@@ -14,6 +14,7 @@ AWS 網路相關的學習筆記和精品文章。涵蓋 VPC、PrivateLink、Dire
 
 **Pillar（主文）**
 - AWS 內網到底是什麼？我的釐清過程
+- Global Accelerator vs CloudFront：AWS 的兩條快速通道
 
 **Cluster（子文）**
 - DNS 在 AWS 中的運作
@@ -40,4 +41,4 @@ AWS 網路相關的學習筆記和精品文章。涵蓋 VPC、PrivateLink、Dire
 
 ---
 
-**最後更新：** 2026-02-15
+**最後更新：** 2026-02-21
