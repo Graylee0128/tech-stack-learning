@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: 設置環境
       run: echo "Setting up environment"
     - name: 執行測試
@@ -68,10 +68,10 @@ jobs:
 ## 常用 Actions
 
 ### 官方 Actions
-- `actions/checkout@v3` - 檢出代碼
-- `actions/setup-node@v3` - 設置 Node.js
+- `actions/checkout@v4` - 檢出代碼
+- `actions/setup-node@v4` - 設置 Node.js
 - `actions/setup-python@v4` - 設置 Python
-- `actions/upload-artifact@v3` - 上傳工件
+- `actions/upload-artifact@v4` - 上傳工件
 - `actions/create-release@v1` - 創建版本發布
 
 ### 社區 Actions
