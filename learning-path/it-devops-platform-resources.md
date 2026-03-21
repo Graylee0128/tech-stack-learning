@@ -26,10 +26,12 @@
 
 ### AWS / Cloud 架構
 
+> 已入手：**AWS for Solutions Architects** (2nd Ed.) ✅ | **AWS Cookbook** ✅
+
 | 書名 | 作者 | 說明 |
 |------|------|------|
-| **AWS for Solutions Architects** (2nd Ed.) | Shrivastava et al. | SAP 備考後的實戰架構設計延伸 |
-| **AWS Cookbook** | Culkin, Zazon | 70+ 自包含食譜，直接可執行，補強實務缺口 |
+| **AWS for Solutions Architects** (2nd Ed.) ✅ | Shrivastava et al. | 架構設計思維，涵蓋 VPC、IAM、Well-Architected，SAP 備考後延伸 |
+| **AWS Cookbook** ✅ | Culkin, Zazon | 70+ 自包含食譜，直接可執行，動手補強實務缺口 |
 
 ---
 
