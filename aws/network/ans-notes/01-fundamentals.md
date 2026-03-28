@@ -1,34 +1,24 @@
 # 01 Fundamentals
 
-## DNS / Route 53 Basics
+## DNS Protocol Basics
 
-**What:** DNS 是把人類可讀名稱轉成機器可用 IP 的分散式命名系統；Route 53 是 AWS 的全球 DNS 與網域服務。
+**What:** DNS 是把人類可讀名稱轉成機器可用 IP 的分散式命名系統。
 
-**When to use:** 理解 VPC DNS、Hybrid DNS、Hosted Zone、記錄型別與快取行為時一定會用到。
+**When to use:** 理解所有 AWS DNS 服務（Route 53、VPC DNS、Hybrid DNS）的協定基礎。
 
 **Key Points:**
 - DNS 核心元件是 Resolver、Zone、Zonefile、Nameserver。
 - DNS 是階層式信任模型，Root Zone 只管理頂層網域並把權限委派給下層。
-- 常見記錄型別：`A`、`AAAA`、`CNAME`、`MX`、`TXT`、`NS`。
+- 常見記錄型別：`A`（名稱→IPv4）、`AAAA`（名稱→IPv6）、`CNAME`（名稱→名稱）、`MX`、`TXT`、`NS`、`SOA`、`SRV`、`PTR`。
 - TTL 影響快取存活時間，TTL 越長，變更生效越慢，但查詢成本與負載通常越低。
-- Route 53 可同時扮演 Domain Registrar 與 Hosted Zone Provider。
-- Hosted Zone 可分成 Public Hosted Zone 與 Private Hosted Zone。
-
-**Comparison:**
-- `A/AAAA` 是名稱對 IP；`CNAME` 是名稱對名稱。
-- Public Hosted Zone 對公網可解析；Private Hosted Zone 只對關聯 VPC 可解析。
-
-**Limits / Caveats:**
-- Apex domain 不能用 `CNAME`，AWS 以 `ALIAS` 解決指向 ELB、CloudFront 等 AWS 資源的需求。
-- Private Hosted Zone 只有關聯的 VPC 才能解析，不是整個 AWS 帳號都能用。
+- Apex domain（zone apex）不能用 `CNAME`——這是 DNS 協定限制，非 AWS 特有。
 
 **⚠️ 考試陷阱:**
-- `ALIAS` 是 AWS 擴充功能，不是標準 DNS record type。
-- VPC 內解析 Public AWS 資源時，可能解析成私網位址，尤其在 VPC 與 Peering 題型很常考。
+- DNS 查詢是遞迴 + 迭代混合流程；Resolver 遞迴查詢，Authoritative NS 迭代回應。
 
 **✅ 記憶點:**
 - DNS 看的是「授權 + 委派 + 快取」。
-- Route 53 最常考：Hosted Zone、Routing Policy、Health Check、Alias、Hybrid DNS。
+- Route 53 服務細節（Hosted Zone、ALIAS、Routing Policy、Health Check、Resolver Endpoint）見 `04-route53-cdn.md`。
 
 ## DDoS
 

@@ -28,7 +28,7 @@
 - Amazon VPC CNI 會在 Node 上建立/附加 ENI，並把 Secondary IP 分配給 Pods。
 - 每種 Instance type 可附加的 ENI 與每 ENI 可掛的 IP 不同，因此會影響 Pod 數上限。
 - Prefix delegation 可把 `/28` IPv4 或 `/80` IPv6 Prefix 指派給 ENI，提高可用 Pod IP 數。
-- EKS 不支援 dual-stack Pod 模式。
+- EKS 自 v1.21+ 起支援 IPv4/IPv6 dual-stack（2023 GA）；啟用時 VPC CNI 需設定 `ENABLE_IPv6=true`，且叢集建立時即須選定 IP family，事後不可切換。
 
 **⚠️ 考試陷阱:**
 - Pod 數量上限常不是 Kubernetes 限制，而是 ENI/IP 容量限制。

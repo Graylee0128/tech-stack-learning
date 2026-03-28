@@ -71,6 +71,21 @@
 **✅ 記憶點:**
 - `Security appliance scaling` 想 GWLB。
 
+## Quick Reference: ALB vs NLB vs GWLB
+
+| 特性 | ALB | NLB | GWLB |
+|------|-----|-----|------|
+| **Layer** | L7（HTTP/HTTPS/gRPC） | L4（TCP/TLS/UDP） | L3/L4（所有 IP 流量） |
+| **路由能力** | Host/Path/Header/Method/Query | Port-based | N/A（透明轉送） |
+| **TLS 處理** | 終止 TLS | Passthrough 或終止 | N/A |
+| **Static IP** | 不支援（可透過 GA 取得固定入口） | 支援（每 AZ 一個 EIP） | N/A |
+| **PrivateLink** | 不直接支援 | 常作為 Provider 端 | 用 GWLB Endpoint |
+| **Client IP 保留** | X-Forwarded-For | 預設保留（L4 passthrough） | 透明（封裝後原始封包不變） |
+| **封裝協定** | 無 | 無 | GENEVE |
+| **WAF 整合** | 支援 | 不支援 | 不支援 |
+| **Cross-zone LB** | 預設開啟 | 預設關閉 | 預設關閉 |
+| **典型場景** | Web App、API、微服務 | 非 HTTP、高效能、固定 IP | 安全設備（IDS/IPS/Firewall） |
+
 ## Deregistration Delay / Connection Draining
 
 **What:** 控制目標離線時，是否讓 in-flight requests 優雅結束。

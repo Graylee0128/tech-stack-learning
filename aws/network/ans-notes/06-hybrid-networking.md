@@ -31,17 +31,22 @@
 
 **When to use:** DX + VPN 備援、Static vs Propagated、Hybrid failover 題型。
 
-**Key Points:**
-- 最長前綴永遠優先。
-- Equal prefix 時，通常 Static Route 優先於 Prefix List，再優先於 Propagated。
-- 在 Propagated routes 中，DX BGP route 優先於 VPN static，再優先於 VPN BGP。
-- 若都是 BGP propagated，會再看 `AS_PATH` 與 `MED`。
+**Key Points — 路由選擇優先序（由高到低）:**
+
+1. **Longest prefix match**（最具體的 CIDR 永遠優先）
+2. **Static route**（手動加的 route entry）
+3. **Prefix list reference**（managed prefix list）
+4. **Propagated: DX BGP route**
+5. **Propagated: VPN static route**
+6. **Propagated: VPN BGP route**
+7. 若同為 BGP propagated 且 prefix 相同，再比 `AS_PATH`（短優先）→ `MED`（低優先）
 
 **⚠️ 考試陷阱:**
 - 很多題目故意同時給 DX 與 VPN，想考你 DX 預設比 VPN 更優先。
+- Static route 會蓋過 propagated route，即使 propagated 是更佳路徑。
 
 **✅ 記憶點:**
-- `Equal prefix` 時先想 Static，再想 DX propagated，再想 VPN。
+- 口訣：`Longest → Static → DX → VPN static → VPN BGP`。
 
 ## Direct Connect
 
@@ -51,7 +56,8 @@
 
 **Key Points:**
 - DX 是 physical port，不自帶 end-to-end 連線，你通常還要透過 provider/cross-connect。
-- 常見速率為 1G / 10G / 100G。
+- Dedicated Connection 速率：1G / 10G / 100G（整個 port 歸你）。
+- Hosted Connection 速率：50 Mbps ~ 10 Gbps（透過 APN Partner 取得，適合 sub-1G 或快速啟用）。
 - DX 沒有內建加密。
 - VIF 類型：Public、Private、Transit。
 - Private VIF 連 VGW 或 DXGW；Transit VIF 經 DXGW 連 TGW；Public VIF 可到 AWS 公網服務。
@@ -71,6 +77,96 @@
 - `Private VIF = private VPC access`
 - `Public VIF = AWS public services`
 - `Transit VIF = TGW integration`
+
+## DX: Dedicated vs Hosted Connection / LAG
+
+**What:** DX 連線分 Dedicated 與 Hosted 兩種取得方式；LAG 可將多條連線綁定提高頻寬與冗餘。
+
+**When to use:** 選型題（頻寬需求、前置時間、成本）、LAG 聚合題。
+
+**Key Points:**
+- **Dedicated Connection**：直接向 AWS 申請，速率 1 Gbps / 10 Gbps / 100 Gbps，你擁有整個 physical port。
+- **Hosted Connection**：透過 APN Partner 提供，速率從 50 Mbps 到 10 Gbps 不等，適合不需要整個 port 或需要 sub-1G 速率的場景。
+- Dedicated 前置時間通常數週到數月；Hosted 通常更快（取決於 Partner）。
+- **LAG（Link Aggregation Group）**：把同一 DX Location 的多條同速率連線綁成一組，使用 LACP。
+- LAG 中所有連線必須相同速率、相同 DX Location。
+- LAG 可設定 minimum links：低於此數量則整個 LAG 失效。
+
+**Comparison:**
+| | Dedicated | Hosted |
+|--|-----------|--------|
+| 速率 | 1G / 10G / 100G | 50M ~ 10G |
+| Port 擁有權 | 你獨占 | Partner 分享 |
+| VIF 建立 | 自己建 | Partner 預建或你建 |
+| 適用 | 高頻寬、長期 | 低頻寬、快速啟用、PoC |
+
+**⚠️ 考試陷阱:**
+- 題目要求「500 Mbps DX」只能選 Hosted Connection，Dedicated 最低 1G。
+- LAG 不能混合不同速率的連線。
+
+**✅ 記憶點:**
+- `Sub-1G DX` 一定是 Hosted Connection。
+- `Aggregate bandwidth at same location` 想 LAG。
+
+## DX Resiliency Patterns
+
+**What:** AWS 官方定義的 DX 高可用架構模式，依照冗餘程度分為四個等級。
+
+**When to use:** 題目問 DX HA、DX 備援設計、RTO/RPO 與成本取捨。
+
+**Key Points:**
+- **Maximum Resiliency**：2 個 DX Location × 每個 Location 各 2 條連線 = 4 條，能容忍整個 Location 失效且仍有冗餘。
+- **High Resiliency**：2 個 DX Location × 每個 Location 各 1 條連線 = 2 條，能容忍單一 Location 失效。
+- **Development / Test**：1 個 DX Location × 1 條連線，無冗餘，僅適合非生產環境。
+- **DX + VPN Backup**：DX 為主要路徑，S2S VPN 為備援，成本較低但 VPN 頻寬有限（~1.25 Gbps）。
+- BFD（Bidirectional Forwarding Detection）可加速故障偵測，將 failover 從 BGP 的數十秒縮短到次秒級。
+
+**Comparison:**
+| 模式 | Location 數 | 連線數 | 容錯能力 | 成本 |
+|------|------------|--------|---------|------|
+| Maximum Resiliency | 2 | 4 | Location 失效 + 連線失效 | 最高 |
+| High Resiliency | 2 | 2 | 單一 Location 失效 | 中高 |
+| DX + VPN Backup | 1 | 1 DX + VPN | DX 失效（VPN 接手） | 中 |
+| Dev/Test | 1 | 1 | 無 | 最低 |
+
+**⚠️ 考試陷阱:**
+- 題目若要求「容忍整個 DX Location 失效」，至少需要 High Resiliency（2 locations）。
+- DX + VPN backup 時，VPN 頻寬遠低於 DX，不適合需要 full bandwidth failover 的場景。
+
+**✅ 記憶點:**
+- `Production critical` 至少 High Resiliency（2 locations）。
+- `Cost-sensitive backup` 想 DX + VPN。
+
+## Direct Connect Gateway (DXGW)
+
+**What:** DXGW 是全球性的邏輯閘道，讓一條 DX 連線可以跨 Region 存取多個 VPC 或 TGW。
+
+**When to use:** 多 Region VPC 存取、DX 與 TGW 整合、避免每個 Region 都拉獨立 DX。
+
+**Key Points:**
+- DXGW 本身是全球資源，不屬於任何 Region。
+- 一個 DXGW 可關聯多個 VGW（不同 Region 的 VPC）或一個 TGW。
+- Private VIF 連 DXGW → DXGW 連 VGW，實現跨 Region 私網存取。
+- Transit VIF 連 DXGW → DXGW 連 TGW，實現跨 Region transit。
+- DXGW 不做 transitive routing：VGW-A 和 VGW-B 都掛在同一個 DXGW，但 VPC-A 和 VPC-B 不能透過 DXGW 互通。
+- DXGW 本身免費，計費在 DX port 與 data transfer。
+
+**Comparison:**
+- Private VIF → DXGW → VGW：適合少量 VPC，每個 VPC 獨立路由。
+- Transit VIF → DXGW → TGW：適合大量 VPC，TGW 統一管理路由。
+
+**Limits / Caveats:**
+- 一個 DXGW 最多關聯 10 個 VGW 或 3 個 TGW（可申請提高）。
+- DXGW 不能同時關聯 VGW 和 TGW。
+- Allowed prefixes 需要手動設定，控制哪些 CIDR 會被公告。
+
+**⚠️ 考試陷阱:**
+- DXGW 不提供 VPC-to-VPC 的 transitive routing，要互通仍需 Peering 或 TGW。
+- Transit VIF 只能連 DXGW，不能直接連 TGW。
+
+**✅ 記憶點:**
+- `Cross-region DX access` 想 DXGW。
+- `DX + TGW` 一定經過 Transit VIF → DXGW → TGW。
 
 ## VGW / Site-to-Site VPN / IPSec / Client VPN
 
@@ -94,6 +190,29 @@
 **✅ 記憶點:**
 - `Quick encrypted hybrid` 想 S2S VPN。
 - `End-user remote access` 想 Client VPN。
+
+## VPN CloudHub
+
+**What:** VPN CloudHub 是利用 VGW 作為 hub，讓多個遠端站點（Customer Gateways）透過 AWS 互通的架構模式。
+
+**When to use:** 多個 On-prem 站點需要透過 AWS 互相通訊、低成本 hub-and-spoke WAN。
+
+**Key Points:**
+- 多個 Customer Gateway 連到同一個 VGW，每個 site 使用不同 BGP ASN。
+- 站點間流量走 VGW 做 transit（hub-and-spoke）。
+- 本質上是多條 S2S VPN 共用一個 VGW 的拓樸。
+- 流量經公網加密傳輸，不需要 DX。
+
+**Comparison:**
+- CloudHub 適合少量站點、低成本；TGW 適合大量站點與更複雜的路由控制。
+- CloudHub 用 VGW 做 hub；TGW 本身就是更強大的 hub。
+
+**⚠️ 考試陷阱:**
+- CloudHub 不是獨立的 AWS 服務，而是一種架構模式（多 CGW → 單一 VGW）。
+- 每個 site 必須使用不同 BGP ASN。
+
+**✅ 記憶點:**
+- `Multiple remote sites need to talk via AWS without DX` 想 VPN CloudHub。
 
 ## Transit Gateway
 
@@ -151,3 +270,19 @@
 
 **✅ 記憶點:**
 - `Need performance without caching` 想 Global Accelerator。
+
+---
+
+## Quick Reference: Hybrid Connectivity 比較表
+
+| 特性 | Direct Connect | Site-to-Site VPN | TGW + VPN | TGW + DX |
+|------|---------------|-----------------|-----------|----------|
+| **連線類型** | 專線（實體） | 公網加密隧道 | 公網加密隧道 | 專線（實體） |
+| **頻寬** | 1G / 10G / 100G（Dedicated）；50M~10G（Hosted） | ~1.25 Gbps per tunnel | ~1.25 Gbps per tunnel（可 ECMP 聚合至 ~50 Gbps） | 同 DX |
+| **延遲** | 低且穩定 | 受公網影響，不穩定 | 同 VPN，Accelerated VPN 可改善 | 同 DX |
+| **加密** | 無內建（可疊加 IPSec over DX 或 MACsec） | IPSec 內建 | IPSec 內建 | 同 DX |
+| **建置時間** | 數週~數月 | 數分鐘 | 數分鐘 | 數週~數月 |
+| **冗餘** | 需自行規劃（Resiliency Patterns） | 預設 2 tunnels | 預設 2 tunnels per attachment | 需自行規劃 |
+| **Transitive routing** | 不支援（需 DXGW + TGW） | 不支援（VGW 模式） | 支援 | 支援（經 TGW） |
+| **成本** | Port-hour + Data out | VPN connection-hour + Data out | TGW attachment + Data processing + VPN | TGW attachment + Data processing + DX |
+| **典型場景** | 長期高頻寬、穩定延遲 | 快速啟用、備援、PoC | 多 VPC hub-and-spoke、ECMP 聚合 | 大規模 Hybrid + 多 VPC |

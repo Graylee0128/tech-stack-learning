@@ -24,6 +24,12 @@
 - **terraform/** - 基礎設施即代碼
   - `notes/` Terraform 速查表和最佳實踐 | `articles/` 設計模式
 
+- **k8s/** - Kubernetes 核心、常用平台生態與 Cluster admin 進階
+  - `core/` Kubernetes 核心：`k3s`、`kubectl`、核心物件與基本排錯
+  - `ecosystem/` 常用平台生態：Helm、Argo CD、Prometheus、Grafana、cert-manager、Cilium、Velero、Istio
+  - `cluster-admin/` 進階主題：`kubeadm`、control plane、cluster bootstrap、CNI / CRI / storage / HA
+  - `LEARNING-STRUCTURE.md` 總學習架構與建議順序
+
 #### DevOps & Development
 - **cicd/github-actions/** - [GitHub Actions 學習與實踐](./cicd/github-actions/)
   - `notes/` 基礎、速查表、最佳實踐 | `articles/` 深度教學

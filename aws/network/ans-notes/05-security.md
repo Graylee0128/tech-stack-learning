@@ -57,6 +57,33 @@
 - `Org-wide enforcement` 想 Firewall Manager。
 - `VPC packet/domain inspection` 想 Network Firewall。
 
+## Route 53 Resolver DNS Firewall
+
+**What:** DNS Firewall 讓你控制 VPC 內的 DNS 查詢，阻擋對惡意或未授權網域的解析。
+
+**When to use:** 防止 DNS exfiltration、阻擋惡意網域、VPC 出站 DNS 控制、合規要求。
+
+**Key Points:**
+- 作用在 Route 53 Resolver（VPC +2）層級，攔截 VPC 內所有 DNS 查詢。
+- 使用 Domain List（自訂或 AWS Managed）+ Rule Group 定義允許/阻擋規則。
+- Rule Group 關聯到 VPC 後生效。
+- Action 可選 ALLOW、BLOCK、ALERT。
+- BLOCK 可回傳 NODATA、NXDOMAIN、或自訂 OVERRIDE IP。
+- AWS 提供 Managed Domain Lists（已知惡意網域、Botnet C&C 等）。
+- 可透過 Firewall Manager 在 Organizations 層級統一部署。
+
+**Comparison:**
+- DNS Firewall 控制 DNS 層（L7 DNS query）；Network Firewall 控制封包層（L3/L4/L7）。
+- DNS Firewall 更輕量，專門擋「解析到壞地方」；Network Firewall 功能更全面但成本更高。
+
+**⚠️ 考試陷阱:**
+- DNS Firewall 只能控制經過 Route 53 Resolver 的查詢；如果 EC2 自己指定外部 DNS server 則繞過。
+- DNS Firewall 是 VPC 級別，不是帳號級別。
+
+**✅ 記憶點:**
+- `Block DNS exfiltration / malicious domains` 想 DNS Firewall。
+- `Org-wide DNS policy` 想 DNS Firewall + Firewall Manager。
+
 ## CloudHSM
 
 **What:** CloudHSM 是單租戶 HSM 服務，讓你完全控制加密金鑰材料。

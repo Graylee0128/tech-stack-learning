@@ -29,12 +29,16 @@
 
 ## 建議複習順序
 
-1. `06-hybrid-networking.md`
-2. `02-vpc.md`
-3. `05-security.md`
-4. `04-route53-cdn.md`
-5. `03-load-balancer.md`
-6. `01-fundamentals.md`
-7. `08-eks-networking.md`
-8. `07-hybrid-services.md`
-9. `09-cost-dr-governance.md`
+依**考試出題比重**排列——先掌握高頻核心，再補齊周邊知識：
+
+| 順序 | 檔案 | 理由 |
+|------|------|------|
+| 1 | `06-hybrid-networking.md` | DX/VPN/TGW/BGP 是 ANS 最高比重題型（約 30%） |
+| 2 | `02-vpc.md` | VPC 是幾乎所有題目的底層基礎 |
+| 3 | `05-security.md` | WAF/Shield/Network Firewall 常與情境題組合 |
+| 4 | `04-route53-cdn.md` | Route 53 + CloudFront 是全球架構核心 |
+| 5 | `03-load-balancer.md` | ALB/NLB/GWLB 選型搭配上述主題出題 |
+| 6 | `01-fundamentals.md` | DNS 協定、OSI、NAT 等基礎——已熟悉者可跳過 |
+| 7 | `08-eks-networking.md` | EKS 題數較少但細節刁鑽 |
+| 8 | `07-hybrid-services.md` | 輔助服務（Wavelength、Outposts 等）低頻 |
+| 9 | `09-cost-dr-governance.md` | 成本與治理偶爾出現，考前掃過即可 |

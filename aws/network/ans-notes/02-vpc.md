@@ -13,7 +13,12 @@
 - VPC 預設沒有任何對外連線能力，需明確加上 IGW、VPN、DX、TGW、Endpoints 等。
 
 **Limits / Caveats:**
-- AWS 在每個 Subnet 會保留 5 個 IP。
+- AWS 在每個 Subnet 會保留 5 個 IP：
+  - `.0` — Network address
+  - `.1` — VPC Router（Default Gateway）
+  - `.2` — Amazon Provided DNS
+  - `.3` — Reserved for future use
+  - `.255` — Broadcast address（VPC 不支援 broadcast，但仍保留）
 - IPv6 在 VPC 中都是可路由位址，但是否可達仍取決於 Route 與 Security Controls。
 
 **⚠️ 考試陷阱:**

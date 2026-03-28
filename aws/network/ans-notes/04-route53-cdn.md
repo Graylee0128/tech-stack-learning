@@ -24,6 +24,35 @@
 **✅ 記憶點:**
 - `Hybrid DNS` 幾乎都在考 Inbound/Outbound Resolver Endpoint。
 
+## Route 53 Health Checks
+
+**What:** Route 53 Health Check 持續監控 endpoint 健康狀態，驅動 DNS failover 與路由決策。
+
+**When to use:** Active/Passive failover、Routing Policy 搭配、多 Region DR、Alarm-based 切換。
+
+**Key Points:**
+- 三種 Health Check 類型：
+  - **Endpoint**：直接對 IP 或 FQDN 做 HTTP/HTTPS/TCP 檢查。
+  - **Calculated**：聚合多個子 Health Check 的結果（AND/OR/至少 N 個健康）。
+  - **CloudWatch Alarm-based**：依據 CloudWatch Alarm 狀態判斷健康。
+- Endpoint Health Check 由全球多個 Region 的 checker 發出請求，需在 SG/NACL 放行這些 IP。
+- Health Check 可設定 failure threshold（連續幾次失敗才算 unhealthy）與 request interval（10s 或 30s）。
+- String Matching：HTTP/HTTPS 可檢查回應 body 前 5120 bytes 是否包含指定字串。
+- Failover Routing Policy 必須搭配 Health Check 才能自動切換。
+
+**Comparison:**
+- Endpoint HC 適合直接監控服務可達性。
+- CloudWatch Alarm HC 適合監控內部指標（如 DynamoDB throttling、Lambda error rate）來觸發 DNS 切換。
+- Calculated HC 適合複合判斷（例如：3 個 microservice 中至少 2 個健康才算整體健康）。
+
+**⚠️ 考試陷阱:**
+- Health Check 只能監控公網可達的 endpoint；私網 endpoint 需改用 CloudWatch Alarm-based HC。
+- Health Check 結果有傳播延遲，不是即時切換。
+
+**✅ 記憶點:**
+- `DNS failover` 一定要有 Health Check。
+- `Private endpoint health` 想 CloudWatch Alarm-based HC。
+
 ## Route 53 Routing Policies
 
 **What:** Route 53 可依不同策略回傳不同解析結果。
