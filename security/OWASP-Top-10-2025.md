@@ -1,516 +1,659 @@
-# OWASP Top 10 2025 - Web 應用安全漏洞指南
+# OWASP Top 10 - Web 應用安全風險指南
 
-## 📚 什麼是 OWASP Top 10？
+> 針對 DevOps / Cloud Engineer (AWS) 背景量身整理，每個漏洞類別都包含雲端基礎設施視角的解讀
 
-**OWASP** = Open Web Application Security Project（開放式 Web 應用安全計畫）
+## 什麼是 OWASP Top 10？
 
-OWASP Top 10 是開發人員和 Web 應用安全的標準參考文件，代表了對 **Web 應用最關鍵安全風險** 的廣泛共識。
+**OWASP** = Open Worldwide Application Security Project（開放式全球應用安全計畫）
 
-**更新頻率**: 每 3-4 年更新一次
-**最新版本**: 2025 (更新於 2025年1月)
-**上一版本**: 2021
+OWASP Top 10 是業界公認的 **Web 應用最關鍵安全風險** 標準參考文件。不只是開發者要懂，**DevOps / SRE / Cloud Engineer** 在設計架構、部署管線、配置基礎設施時同樣必須理解。
 
----
-
-## 🎯 OWASP Top 10 2025 完整列表
-
-| 排名 | 漏洞類型 | 英文名稱 | 2021排名 | 狀態 |
-|-----|--------|--------|--------|------|
-| #1 | 破損的存取控制 | Broken Access Control | #1 | ✅ |
-| #2 | 加密失敗 | Cryptographic Failures | #2 | ✅ |
-| #3 | 注入攻擊 | Injection | #3 | ⬇️ (降至#5) |
-| #4 | 不安全的設計 | Insecure Design | #4 | ⬇️ (降至#6) |
-| #5 | 安全設置錯誤 | Security Misconfiguration | #5 | ✅ |
-| #6 | 易受攻擊和過時的元件 | Vulnerable and Outdated Components | #6 | ✅ |
-| #7 | 身份識別和身份驗證失敗 | Identification and Authentication Failures | #7 | ✅ |
-| #8 | 軟體供應鏈缺陷 | Software and Data Integrity Failures | #8 | ✅ |
-| #9 | 日誌和監控不足 | Security Logging and Monitoring Failures | #9 | ✅ |
-| #10 | 伺服器端請求偽造 (SSRF) | Server-Side Request Forgery (SSRF) | #10 | ✅ |
-
-### 🆕 2025 版本新增或調整
-
-**新進入榜單**:
-- **軟體供應鏈缺陷** - 從 2021 年的「易受攻擊和過時的元件」大幅擴展
-  - 涵蓋：惡意依賴、被盜用的構建工具、不安全的 CI/CD 管道
-
-**排名變化**:
-- **注入攻擊** (#3 → #5) - 雖然仍是危險的漏洞，但優先級下降
-- **不安全的設計** (#4 → #6) - 反映產業逐漸採用安全設計原則
+| 項目 | 說明 |
+|------|------|
+| 更新頻率 | 每 3-4 年 |
+| 最新版本 | **2025**（2025 年初發布） |
+| 上一版本 | 2021 |
+| 涵蓋 CWE 數量 | 248 個（2025 版） |
 
 ---
 
-## 📋 OWASP Top 10 詳細解析
+## 2021 → 2025 版本演進對照
 
-### #1 破損的存取控制 (Broken Access Control)
+| 2025 排名 | 2025 名稱 | 2021 排名 | 變化說明 |
+|-----------|-----------|-----------|----------|
+| A01 | Broken Access Control | A01 (2021) | 維持 #1，SSRF 併入此類 |
+| A02 | Security Misconfiguration | A05 (2021) | **大幅上升**，反映雲端錯誤配置氾濫 |
+| A03 | Software Supply Chain Failures | A06 (2021) | **全新擴展**，從「過時元件」升級為供應鏈安全 |
+| A04 | Cryptographic Failures | A02 (2021) | 微降 |
+| A05 | Injection | A03 (2021) | 持續下降，工具鏈進步有效緩解 |
+| A06 | Insecure Design | A04 (2021) | 微降 |
+| A07 | Authentication Failures | A07 (2021) | 維持 |
+| A08 | Software or Data Integrity Failures | A08 (2021) | 維持 |
+| A09 | Logging & Alerting Failures | A09 (2021) | 改名：Monitoring → **Alerting**，強調告警能力 |
+| A10 | Mishandling of Exceptional Conditions | 新增 | **全新類別**，取代 SSRF（SSRF 併入 A01） |
 
-**定義**:
-應用程式未能正確驗證和授權用戶操作，允許用戶訪問他們不應該有權限的資源或執行他們不應該執行的操作。
-
-**常見場景**:
-```
-❌ 用戶可以直接修改 URL 存取他人的帳戶
-❌ 普通用戶可以執行管理員功能
-❌ 用戶 ID 在 URL 中可被修改 (如 /user/123 → /user/456)
-❌ 無法驗證用戶對某資源的所有權
-❌ 功能級存取控制不足
-```
-
-**實例**:
-```
-原始 URL: https://api.example.com/profile/user123/data
-攻擊者修改為: https://api.example.com/profile/user456/data
-結果: 直接訪問了其他用戶的私人數據
-```
-
-**預防措施**:
-- ✅ 實施強大的存取控制機制（如 RBAC - 角色基礎存取控制）
-- ✅ 默認拒絕訪問（Deny by default）
-- ✅ 每次請求都驗證用戶權限
-- ✅ 避免在 URL 中直接暴露用戶 ID
-- ✅ 使用 UUID 或 token 替代 ID
-- ✅ 為 API 實施限流和授權檢查
+**2025 版重點趨勢：**
+- 從「症狀」轉向「根因」分析
+- Security Misconfiguration 升至 #2 → **對 DevOps/Cloud 工程師是最大警訊**
+- 供應鏈安全獨立成類 → CI/CD pipeline 安全成為焦點
+- SSRF 不再獨立，併入 Broken Access Control
 
 ---
 
-### #2 加密失敗 (Cryptographic Failures)
+## 十大漏洞詳解
 
-**定義**:
-敏感數據在傳輸、存儲或處理時未能得到妥善保護，導致數據被洩露或篡改。
+### A01: Broken Access Control（破損的存取控制）
 
-**常見場景**:
+**2025 排名 #1 | 2021 排名 #1 | 最嚴重的安全風險**
+
+**白話解釋：** 系統沒有正確檢查「你是誰」和「你能做什麼」，讓使用者能存取或操作他們不該碰的東西。
+
+**常見攻擊模式：**
+
+| 攻擊手法 | 說明 | 範例 |
+|----------|------|------|
+| IDOR | 直接修改物件 ID 存取他人資料 | `/api/user/123` → `/api/user/456` |
+| 權限提升 | 普通用戶執行管理員操作 | 普通帳號呼叫 `/admin/delete-user` |
+| SSRF（2025 併入） | 利用伺服器發起內部請求 | 存取 `http://169.254.169.254/` 取得 AWS metadata |
+| 功能級繞過 | 前端隱藏的功能後端未驗證 | 直接 POST 到隱藏的 API endpoint |
+
+**真實案例：**
+- **Facebook 資料外洩（2021）**：API 未限制存取控制，5.33 億用戶資料被大規模爬取
+- **Capital One 事件（2019）**：WAF 設定錯誤 + SSRF → 攻擊者存取 AWS metadata → 取得 IAM 臨時憑證 → 存取 S3 bucket 中 1 億筆客戶資料
+
+**DevOps / Cloud 視角 — 你的工作場景中怎麼出現？**
+
 ```
-❌ 使用過時的加密算法（如 MD5、SHA-1）
-❌ 密碼以明文形式存儲
-❌ 敏感數據傳輸時未使用 HTTPS
-❌ SSL/TLS 配置不當
-❌ 硬編碼密鑰或密碼
-❌ 缺少加密金鑰管理策略
+你做 AWS 上雲 PoC 時的風險點：
+
+1. IAM Policy 太寬鬆
+   ❌ "Effect": "Allow", "Action": "*", "Resource": "*"
+   ✅ 最小權限原則，每個 Lambda/EC2 只給需要的權限
+
+2. S3 Bucket Policy 公開
+   ❌ "Principal": "*"（公開存取）
+   ✅ 限定特定 IAM Role 或 VPC Endpoint
+
+3. API Gateway 缺少授權
+   ❌ API endpoint 沒有設定 Authorizer
+   ✅ 使用 Cognito / Lambda Authorizer / IAM Auth
+
+4. EC2 metadata SSRF（Capital One 同類）
+   ❌ 使用 IMDSv1（HTTP GET 即可取得）
+   ✅ 強制 IMDSv2（需要 PUT token 才能存取）
 ```
 
-**實例**:
-```
-SQL 中的密碼存儲：
-❌ 不良: password = "password123"
-✅ 良好: password_hash = bcrypt("password123", salt)
-```
-
-**預防措施**:
-- ✅ 所有傳輸使用 HTTPS (TLS 1.2+)
-- ✅ 密碼使用強加密演算法 (bcrypt, Argon2, PBKDF2)
-- ✅ 敏感數據在靜止時加密
-- ✅ 定期更新加密協議
-- ✅ 妥善管理加密金鑰（不硬編碼）
-- ✅ 禁用 HTTP，強制 HTTPS
+**AWS 具體防禦：**
+- IAM Access Analyzer：自動分析過寬權限
+- AWS Config Rules：持續檢查資源配置合規性
+- VPC Endpoint Policy：限制 S3/DynamoDB 的存取來源
+- IMDSv2：防止 SSRF 竊取 EC2 metadata
 
 ---
 
-### #3 注入攻擊 (Injection)
+### A02: Security Misconfiguration（安全配置錯誤）
 
-**定義**:
-不信任的數據被解釋為代碼並執行，導致攻擊者可以修改或執行意外的操作。
+**2025 排名 #2（從 2021 #5 大幅上升）| 對 DevOps 最重要的類別**
 
-**主要類型**:
+**白話解釋：** 系統、服務、雲端資源使用了不安全的預設配置，或者管理員忘記關掉不該開的東西。
 
-#### 🔴 SQL 注入 (SQL Injection)
+**為什麼 2025 年升到 #2？** 因為雲端基礎設施爆炸性成長，IaC 部署速度快，配置錯誤成為最常見的攻擊入口。
+
+**常見錯誤配置：**
+
+| 層級 | 錯誤範例 | 後果 |
+|------|---------|------|
+| OS 層 | RHEL 預設開啟不需要的服務 | 攻擊面增大 |
+| 網路層 | Security Group 0.0.0.0/0 開放 SSH | 暴力破解風險 |
+| 應用層 | Debug mode 在 production 開啟 | 洩漏 stack trace、環境變數 |
+| 雲端層 | S3 bucket public access 未關閉 | 資料外洩 |
+| 容器層 | Docker container 用 root 運行 | 容器逃逸風險 |
+| IaC 層 | Terraform 未設定 encryption at rest | 資料未加密 |
+
+**真實案例：**
+- **Uber S3 外洩（2017）**：GitHub 上意外暴露 AWS 憑證 → 存取未加密的 S3 bucket → 5700 萬用戶資料外洩
+- **Tesla Kubernetes Dashboard（2018）**：K8s dashboard 無密碼保護 → 攻擊者進入後用 Tesla 的 AWS 資源挖礦
+
+**DevOps / Cloud 視角 — 你的日常工作中最常踩的坑：**
+
+```
+RHEL 系統升級專案中的配置風險：
+
+1. 升級後 firewalld 規則重置
+   ❌ 升級 RHEL 7→8→9 後未驗證 firewall rules
+   ✅ Post-upgrade checklist 包含 firewalld 驗證
+
+2. SELinux 被設成 Permissive 或 Disabled
+   ❌ 為了「方便」關掉 SELinux
+   ✅ 保持 Enforcing，用 audit2allow 處理 policy
+
+3. SSH 配置
+   ❌ PermitRootLogin yes, PasswordAuthentication yes
+   ✅ PermitRootLogin no, 只允許 key-based auth
+
+Terraform IaC 中的配置風險：
+
+4. Security Group 過寬
+   ❌ ingress { from_port=0, to_port=65535, cidr_blocks=["0.0.0.0/0"] }
+   ✅ 只開放需要的 port，限制來源 IP
+
+5. RDS 公開存取
+   ❌ publicly_accessible = true
+   ✅ publicly_accessible = false，透過 VPC 內部存取
+
+6. 未啟用加密
+   ❌ 忘記設定 storage_encrypted = true
+   ✅ 所有 RDS、EBS、S3 預設加密
+```
+
+**AWS 具體防禦：**
+- AWS Config：持續監控配置偏移
+- AWS Security Hub：統一安全態勢管理
+- tfsec / checkov：Terraform 靜態安全掃描
+- AWS Trusted Advisor：自動建議安全改善
+
+---
+
+### A03: Software Supply Chain Failures（軟體供應鏈失敗）
+
+**2025 排名 #3（全新擴展）| 從 2021 的「過時元件」升級為完整供應鏈安全**
+
+**白話解釋：** 你的應用依賴的第三方套件、CI/CD 工具鏈、或建構流程本身被污染或有漏洞。
+
+**為什麼獨立成類？** 近年供應鏈攻擊爆炸性成長，攻擊者不直接攻擊你，而是攻擊你信任的上游。
+
+**攻擊面：**
+
+```
+供應鏈攻擊的三個層面：
+
+1. 依賴層 — 惡意或有漏洞的套件
+   └─ npm/pip/gem 套件被植入後門
+   └─ 已知 CVE 的舊版本未更新
+
+2. 建構層 — CI/CD pipeline 被入侵
+   └─ GitHub Actions workflow 被篡改
+   └─ 建構伺服器被攻破
+
+3. 分發層 — 更新機制被劫持
+   └─ 軟體更新伺服器被攻陷
+   └─ 缺少簽名驗證
+```
+
+**真實案例：**
+- **SolarWinds Orion（2020）**：建構系統被入侵 → 在合法更新中植入後門 → 影響 18,000+ 組織（包括美國政府）
+- **XZ Utils 後門（2024）**：維護者帳號被社交工程攻陷 → 在壓縮工具中植入後門 → 差點影響所有 Linux 發行版
+- **Log4Shell（2021）**：Log4j 零日漏洞 → 幾乎所有 Java 應用受影響 → 史上影響範圍最大的漏洞之一
+- **Codecov Bash Uploader（2021）**：CI 工具的腳本被篡改 → 竊取用戶的環境變數和密鑰
+
+**DevOps / Cloud 視角 — 你的 CI/CD 和基礎設施：**
+
+```
+GitHub Actions 風險：
+❌ 使用 third-party action 不鎖版本
+   uses: some-action@main  # 可能被惡意更新
+✅ 鎖定 commit hash
+   uses: some-action@abc123def456
+
+Docker Image 風險：
+❌ FROM python:latest  # 可能引入已知漏洞
+✅ FROM python:3.12-slim@sha256:abc123...  # 鎖定 digest
+
+Terraform Provider 風險：
+❌ 不鎖版本的 provider
+✅ required_providers { aws = { version = "~> 5.0" } }
+
+RHEL 套件風險：
+❌ yum install 未驗證 GPG 簽名
+✅ 使用 Red Hat 官方 repo + GPG key 驗證
+```
+
+**防禦工具鏈：**
+- Dependabot / Renovate：自動更新依賴 + 漏洞通知
+- Trivy / Grype：容器映像漏洞掃描
+- SBOM（Software Bill of Materials）：軟體物料清單
+- AWS ECR Image Scanning：容器映像掃描
+- Sigstore / cosign：容器映像簽名驗證
+
+---
+
+### A04: Cryptographic Failures（加密失敗）
+
+**2025 排名 #4 | 2021 排名 #2**
+
+**白話解釋：** 敏感資料在傳輸或儲存時沒有被正確加密保護，或者使用了已被破解的加密方式。
+
+**常見錯誤：**
+
+| 層面 | 錯誤 | 正確做法 |
+|------|------|---------|
+| 傳輸中 | HTTP 明文傳輸敏感資料 | 強制 HTTPS (TLS 1.2+) |
+| 儲存中 | 密碼明文存資料庫 | bcrypt / Argon2 雜湊 |
+| 金鑰管理 | 硬編碼 API Key 在程式碼中 | 使用 Secrets Manager |
+| 演算法 | MD5 / SHA-1 | SHA-256+ / AES-256 |
+| 憑證 | 自簽憑證用在 production | ACM 免費託管憑證 |
+
+**真實案例：**
+- **Equifax（2017）**：未修補 Apache Struts 漏洞 + 敏感資料未加密 → 1.47 億人個資外洩
+- **Adobe（2013）**：3800 萬用戶密碼用 3DES ECB 模式加密（可逆且有 pattern）→ 輕易破解
+
+**DevOps / Cloud 視角：**
+
+```
+你的 AWS 架構中的加密要點：
+
+傳輸中加密 (Encryption in Transit):
+├─ ALB/CloudFront → ACM 免費 TLS 憑證
+├─ API Gateway → 強制 HTTPS
+└─ RDS 連線 → require_ssl = true
+
+靜態加密 (Encryption at Rest):
+├─ S3 → SSE-S3 / SSE-KMS
+├─ RDS → storage_encrypted = true
+├─ EBS → encrypted = true
+└─ DynamoDB → 預設 AWS managed key
+
+金鑰管理:
+├─ AWS KMS → 集中管理加密金鑰
+├─ AWS Secrets Manager → API key, DB password
+├─ Parameter Store → 非敏感配置
+└─ 絕對不要把 secret 放在 Terraform state 明文中
+    → 使用 S3 backend + encryption + DynamoDB lock
+```
+
+---
+
+### A05: Injection（注入攻擊）
+
+**2025 排名 #5 | 2021 排名 #3 | 持續下降但仍然危險**
+
+**白話解釋：** 攻擊者在輸入中夾帶惡意指令，系統把它當成合法指令執行。
+
+**主要類型及範例：**
+
+#### SQL Injection
 ```sql
--- 用戶輸入: ' OR '1'='1
--- 原意: SELECT * FROM users WHERE username = '用戶名' AND password = '密碼'
--- 實際執行: SELECT * FROM users WHERE username = '' OR '1'='1' AND password = ''
--- 結果: 返回所有用戶！
+-- 用戶輸入: ' OR '1'='1' --
+-- 原始查詢: SELECT * FROM users WHERE name = '{input}'
+-- 變成:     SELECT * FROM users WHERE name = '' OR '1'='1' --'
+-- 結果: 繞過驗證，返回所有用戶
 ```
 
-**影響**: 讀取、修改、刪除數據庫內容
-
-#### 🔴 跨網站指令碼 (XSS - Cross-Site Scripting)
-```html
-<!-- 用戶輸入: <script>alert('hacked')</script> -->
-<!-- 如果未經過濾，該指令碼會在其他用戶的瀏覽器中執行 -->
-<!-- 可能盜取 cookies、session 或重定向到釣魚網站 -->
-```
-
-**影響**: 盜取用戶 session、重定向到惡意網站、資料竊取
-
-#### 🔴 OS 注入 (Command Injection)
+#### Command Injection（OS 指令注入）
 ```bash
-# 用戶輸入: ; rm -rf /
-# 原意: ping google.com
-# 實際: ping google.com; rm -rf /
+# 應用功能: ping 使用者指定的 host
+# 用戶輸入: google.com; cat /etc/passwd
+# 實際執行: ping google.com; cat /etc/passwd
+# 結果: 執行了任意系統指令
 ```
 
-**預防措施**:
-- ✅ 使用參數化查詢 (Prepared Statements)
-  ```python
-  # ❌ 不良
-  query = f"SELECT * FROM users WHERE id = {user_id}"
+#### Template Injection（模板注入）
+```python
+# Jinja2 SSTI
+# 用戶輸入: {{7*7}}
+# 如果直接渲染，輸出 49 → 確認可注入
+# 進階: {{config.items()}} → 洩漏應用配置
+```
 
-  # ✅ 良好
-  query = "SELECT * FROM users WHERE id = ?"
-  cursor.execute(query, (user_id,))
-  ```
-- ✅ 輸入驗證與白名單
-- ✅ 輸出編碼 (HTML encoding)
-- ✅ 使用 ORM 框架
-- ✅ 最小化權限原則
+**防禦要點：**
+```python
+# ❌ 字串拼接 SQL（絕對不要）
+query = f"SELECT * FROM users WHERE id = {user_id}"
+
+# ✅ 參數化查詢
+query = "SELECT * FROM users WHERE id = %s"
+cursor.execute(query, (user_id,))
+
+# ✅ ORM（更好）
+user = User.objects.get(id=user_id)
+```
+
+**DevOps 視角：**
+- Shell script 中使用 `eval` 或不加引號的變數展開是 command injection 溫床
+- Terraform `local-exec` provisioner 如果用了未驗證的輸入也會有風險
+- AWS Lambda 執行外部 command 時同樣要注意
+- AWS WAF + Cloud Armor 可在網路層攔截常見注入 pattern
 
 ---
 
-### #4 不安全的設計 (Insecure Design)
+### A06: Insecure Design（不安全的設計）
 
-**定義**:
-在設計階段就存在安全缺陷，而不是實現過程中的編碼錯誤。
+**2025 排名 #6 | 2021 排名 #4**
 
-**常見場景**:
+**白話解釋：** 問題不在「實作寫錯」，而在「設計就沒考慮安全」。再完美的程式碼也修不了設計層面的缺陷。
+
+**設計 vs 實作的差別：**
+
 ```
-❌ 無密碼重置機制
-❌ 無防暴力破解措施
-❌ 無資料驗證機制
-❌ 無審計日誌
-❌ 單點故障設計
-❌ 沒有威脅建模
-```
+Insecure Design（設計問題）:
+  "密碼重設只需要生日" → 設計就是不安全的
 
-**預防措施**:
-- ✅ 進行威脅建模
-- ✅ 在架構層面考慮安全
-- ✅ 實施安全設計模式
-- ✅ 定期進行安全評審
-- ✅ 實施防暴力破解機制
-- ✅ 建立完整的審計日誌
+Implementation Bug（實作問題）:
+  "密碼重設的 token 沒有過期時間" → 實作有 bug
 
----
-
-### #5 安全設置錯誤 (Security Misconfiguration)
-
-**定義**:
-系統、框架、數據庫或伺服器的安全設置不當，導致未授權訪問或信息洩露。
-
-**常見場景**:
-```
-❌ 使用默認認證憑證 (admin/admin)
-❌ 不必要的服務或端口開放
-❌ 調試模式啟用在生產環境
-❌ 詳細的錯誤信息洩露敏感信息
-❌ 過時的軟件和依賴
-❌ 不安全的 HTTP 標頭
+前者需要重新設計架構，後者修幾行 code 就好
 ```
 
-**預防措施**:
-- ✅ 立即更改默認認證
-- ✅ 最小化權限原則（關閉不需要的服務）
-- ✅ 在生產環境禁用調試模式
-- ✅ 設置安全的 HTTP 標頭
-  ```
-  X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
-  Strict-Transport-Security: max-age=31536000
-  ```
-- ✅ 定期更新依賴
-- ✅ 建立設置檢查清單
+**常見設計缺陷：**
+- 沒有做 Threat Modeling（威脅建模）
+- 無 rate limiting 的登入/API
+- 沒有考慮 abuse case（濫用情境）
+- 過度信任 client 端的資料
 
----
+**DevOps / Cloud 視角 — 架構設計時要考慮的：**
 
-### #6 易受攻擊和過時的元件 (Vulnerable and Outdated Components)
-
-**定義**:
-使用已知存在漏洞的過時庫、框架或依賴。
-
-**常見場景**:
 ```
-❌ 使用已有公開 CVE 的舊版本庫
-❌ 沒有追蹤依賴的安全更新
-❌ 使用不再維護的開源項目
-❌ 沒有進行依賴掃描
-```
+你做 AWS 架構設計時的安全設計原則：
 
-**實例**:
-```
-package.json 中的舊版本:
-"dependencies": {
-  "lodash": "3.0.0"  // ❌ 存在已知漏洞
-}
+1. 網路隔離
+   ✅ Public / Private / Isolated subnet 分層
+   ✅ NAT Gateway 讓 private subnet 出去
+   ✅ VPC Endpoint 避免流量走 internet
 
-npm audit 會警告此漏洞
-```
+2. 最小權限
+   ✅ 每個 Lambda/EC2 獨立的 IAM Role
+   ✅ 細粒度 Policy（指定 Resource ARN）
 
-**預防措施**:
-- ✅ 定期更新依賴
-- ✅ 使用工具掃描漏洞 (npm audit, OWASP Dependency-Check)
-- ✅ 只使用受維護的依賴
-- ✅ 監控安全公告
-- ✅ 實施自動化的安全掃描
+3. Defense in Depth（縱深防禦）
+   ✅ Security Group + NACL + WAF 多層防禦
+   ✅ 不只靠一層做安全
 
----
-
-### #7 身份識別和身份驗證失敗 (Identification and Authentication Failures)
-
-**定義**:
-身份驗證機制實現不當，導致攻擊者可以冒充合法用戶。
-
-**常見場景**:
-```
-❌ 允許弱密碼
-❌ 無多因素認證 (MFA)
-❌ Session ID 可預測
-❌ 密碼重置流程不安全
-❌ 無密碼強度要求
-❌ 無帳戶鎖定機制（防暴力破解）
-```
-
-**預防措施**:
-- ✅ 強制強密碼要求
-- ✅ 實施 MFA (多因素認證)
-- ✅ 使用安全的 Session 管理
-- ✅ 隨機化 Session ID
-- ✅ 實施帳戶鎖定（N 次失敗後）
-- ✅ 安全的密碼重置機制
-- ✅ 監控異常登入活動
-
----
-
-### #8 軟體和數據完整性失敗 (Software and Data Integrity Failures)
-
-**定義**:
-軟件更新、CI/CD 管道或數據在傳輸時缺乏完整性檢查，導致可能的篡改。
-
-**常見場景**:
-```
-❌ 從不可信源下載依賴
-❌ 無簽名的依賴
-❌ 不安全的 CI/CD 管道
-❌ 被盜用的包管理器帳戶
-❌ 無完整性校驗
-```
-
-**實例**:
-```
-2023 年: XZ Utils 後門事件
-被盜用的帳戶在流行的 Linux 工具中植入惡意代碼
-```
-
-**預防措施**:
-- ✅ 使用數位簽名驗證軟件
-- ✅ 只從官方來源下載依賴
-- ✅ 實施安全的 CI/CD 管道
-- ✅ 進行代碼評審
-- ✅ 使用軟件物料清單 (SBOM - Software Bill of Materials)
-- ✅ 監控供應鏈威脅
-
----
-
-### #9 日誌和監控不足 (Security Logging and Monitoring Failures)
-
-**定義**:
-缺乏充分的日誌記錄和監控，導致無法檢測或響應安全事件。
-
-**常見場景**:
-```
-❌ 登入失敗未記錄
-❌ 無異常活動檢測
-❌ 日誌可被刪除或篡改
-❌ 未監控高風險操作
-❌ 無關鍵事件警報
-```
-
-**預防措施**:
-- ✅ 記錄所有身份驗證嘗試
-- ✅ 記錄高風險操作 (删除、修改權限等)
-- ✅ 集中式日誌管理 (ELK Stack、Splunk)
-- ✅ 實施警報機制
-- ✅ 定期審查日誌
-- ✅ 保護日誌不被篡改
-- ✅ 保持足夠的日誌保留期
-
----
-
-### #10 伺服器端請求偽造 (Server-Side Request Forgery - SSRF)
-
-**定義**:
-應用程式從用戶控制的輸入獲取遠程資源，而未驗證該 URL，導致攻擊者可以訪問內部資源。
-
-**常見場景**:
-```
-❌ 接受用戶提供的 URL 並獲取內容
-❌ 無 URL 驗證
-❌ 可訪問內部 IP 地址
-❌ 可訪問元數據服務（AWS IMDSv1）
-```
-
-**實例**:
-```
-應用程式功能: 根據提供的 URL 獲取圖片
-用戶輸入: http://internal-admin-panel.local/config
-結果: 應用程式獲取並返回內部配置信息
-```
-
-**預防措施**:
-- ✅ 驗證和過濾用戶提供的 URL
-- ✅ 禁止訪問本地和私有 IP 地址
-  ```
-  127.0.0.1, 192.168.*, 10.0.0.0/8, 172.16.0.0/12
-  ```
-- ✅ 使用 URL 白名單
-- ✅ 禁用不必要的 HTTP 重定向跟隨
-- ✅ 檢查文件協議 (禁止 file://)
-- ✅ 使用 DNS 重新綁定防護
-
----
-
-## 🛡️ 通用防禦策略
-
-### 1️⃣ 安全開發生命週期 (SDLC)
-```
-需求分析 (威脅建模)
-    ↓
-設計 (安全架構)
-    ↓
-編碼 (安全編碼實踐)
-    ↓
-測試 (SAST, DAST, 滲透測試)
-    ↓
-部署 (安全配置)
-    ↓
-維護 (日誌、監控、補丁管理)
-```
-
-### 2️⃣ 輸入驗證與輸出編碼
-```
-信任邊界:
-外部輸入 (用戶、API、文件)
-    ↓ 驗證與清理
-內部處理
-    ↓ 編碼
-輸出 (HTML、SQL、命令)
-```
-
-### 3️⃣ 最小權限原則 (Principle of Least Privilege)
-- 用戶只有執行其職能所需的最低權限
-- 應用程式運行於最小權限級別
-- 數據庫帳戶只有必要的權限
-
-### 4️⃣ 深度防禦 (Defense in Depth)
-```
-多層安全:
-第一層: 網路 (防火牆、WAF)
-第二層: 應用 (身份驗證、授權)
-第三層: 數據 (加密、備份)
-第四層: 監控 (日誌、告警)
+4. Fail Secure
+   ✅ 系統故障時進入安全狀態，而非開放狀態
+   ✅ 預設 deny all，明確 allow 需要的
 ```
 
 ---
 
-## 📊 OWASP Top 10 對開發者的影響
+### A07: Authentication Failures（身份驗證失敗）
 
-### 按角色的重點
+**2025 排名 #7 | 2021 排名 #7**
 
-**後端開發**:
-- 🔴 #1 破損的存取控制
-- 🔴 #3 注入攻擊
-- 🔴 #7 身份驗證失敗
+**白話解釋：** 登入機制有缺陷，讓攻擊者能冒充合法使用者。
 
-**前端開發**:
-- 🔴 #3 XSS 攻擊
-- 🔴 #5 安全設置錯誤
-- 🔴 #8 不安全的依賴
+**常見漏洞：**
+- 允許弱密碼（`123456`, `password`）
+- 無 MFA（多因素認證）
+- Session ID 可預測
+- 暴力破解無防護（無 rate limit、無 lockout）
+- 密碼重設流程不安全
 
-**DevOps/基礎設施**:
-- 🔴 #5 安全設置錯誤
-- 🔴 #6 易受攻擊的元件
-- 🔴 #9 日誌和監控
+**DevOps / Cloud 視角：**
 
-**全棧**:
-- 🔴 #2 加密失敗
-- 🔴 #4 不安全的設計
-- 🔴 #10 SSRF
+```
+AWS 環境的身份驗證安全：
 
----
+IAM 層面：
+├─ Root Account → 啟用 MFA + 極少使用
+├─ IAM User → 啟用 MFA + 強密碼政策
+├─ Access Key → 定期輪換（90 天）
+├─ Assume Role → 跨帳號用 STS，不要長期憑證
+└─ SSO → 使用 AWS IAM Identity Center 集中管理
 
-## 🧪 如何測試和驗證
+Linux 系統層面（你的 RHEL 經驗）：
+├─ SSH Key-based auth only（禁用密碼登入）
+├─ fail2ban → 防暴力破解
+├─ PAM 模組 → 密碼複雜度要求
+└─ sudo → 細粒度授權，不用 NOPASSWD
 
-### OWASP 提供的資源
-
-1. **OWASP ZAP** - 免費的 Web 應用安全掃描工具
-2. **Burp Suite** - 專業的滲透測試工具
-3. **OWASP Testing Guide** - 詳細的測試方法論
-
-### 常用命令示例
-
-```bash
-# 用 OWASP ZAP 進行掃描
-zaproxy -cmd -quickurl http://example.com -quickout report.html
-
-# 用 npm audit 檢查依賴漏洞
-npm audit
-
-# 用 OWASP Dependency-Check
-dependency-check --project "MyApp" --scan /path/to/app
+應用層面：
+├─ Cognito / Auth0 → 不要自己造輪子
+├─ JWT → 設定合理過期時間
+└─ OAuth 2.0 + PKCE → 現代授權流程
 ```
 
 ---
 
-## 📚 進一步學習資源
+### A08: Software or Data Integrity Failures（軟體或資料完整性失敗）
 
-### 官方資源
-- [OWASP Top 10:2025 官方文檔](https://owasp.org/Top10/2025/)
-- [OWASP Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
+**2025 排名 #8 | 2021 排名 #8**
+
+**白話解釋：** 程式碼或資料在傳遞過程中被竄改，但系統沒有能力偵測到。
+
+**與 A03（供應鏈）的區別：**
+- A03 關注「你用的東西本身有問題」（惡意套件、CVE）
+- A08 關注「傳遞過程中被竄改」（更新被劫持、CI/CD 被入侵）
+
+**常見場景：**
+- 應用自動更新沒有驗證簽名
+- CI/CD pipeline 沒有保護建構產物
+- Deserialization 攻擊（反序列化）
+- CDN 上的 JavaScript 被竄改但沒有 SRI 驗證
+
+**DevOps / Cloud 視角：**
+
+```
+CI/CD Pipeline 安全：
+├─ GitHub Actions
+│   ├─ ✅ 用 OIDC 取代 long-lived AWS credentials
+│   ├─ ✅ 限制 workflow permissions (最小權限)
+│   └─ ✅ Branch protection rules + required reviews
+├─ 建構產物
+│   ├─ ✅ Docker image 簽名 (cosign)
+│   ├─ ✅ Terraform plan 產出需要人工 approve
+│   └─ ✅ 建構環境隔離（不共用 runner）
+└─ 部署
+    ├─ ✅ 不可變基礎設施（immutable infrastructure）
+    ├─ ✅ 藍綠部署 / Canary 部署
+    └─ ✅ 部署後自動化驗證
+```
+
+---
+
+### A09: Logging & Alerting Failures（日誌和告警失敗）
+
+**2025 排名 #9 | 2021 排名 #9 | 改名：Monitoring → Alerting**
+
+**白話解釋：** 被攻擊了卻不知道，或者知道了卻沒人處理。業界平均發現入侵的時間是 **200 天**。
+
+**改名的意義：** 光有「監控」不夠，需要有效的「告警」才能觸發行動。
+
+**該記錄什麼：**
+```
+必須記錄的事件（Audit Log）：
+├─ 身份驗證：登入成功/失敗、密碼重設
+├─ 授權：權限變更、存取被拒
+├─ 資料操作：CRUD 敏感資料
+├─ 系統：配置變更、服務啟停
+└─ 安全：WAF 告警、異常流量
+
+不該記錄的：
+├─ 密碼明文
+├─ Session token
+├─ 信用卡號
+└─ 個人敏感資料
+```
+
+**DevOps / Cloud 視角 — 這是你最日常的工作：**
+
+```
+AWS 日誌和監控生態系：
+
+收集：
+├─ CloudTrail → AWS API 操作記錄（誰在什麼時候做了什麼）
+├─ VPC Flow Logs → 網路流量記錄
+├─ CloudWatch Logs → 應用/系統日誌
+├─ S3 Access Logs → Bucket 存取記錄
+├─ ALB/API Gateway Logs → 請求記錄
+└─ Config → 資源配置變更記錄
+
+集中管理：
+├─ CloudWatch Log Groups → 集中查詢
+├─ S3 + Athena → 大量日誌分析
+└─ OpenSearch → 全文搜索 (ELK 替代方案)
+
+告警：
+├─ CloudWatch Alarms → 指標告警
+├─ EventBridge → 事件驅動告警
+├─ SNS → 通知分發（Email/Slack/PagerDuty）
+└─ GuardDuty → 智慧威脅偵測
+
+RHEL 系統層面：
+├─ journald / rsyslog → 系統日誌
+├─ auditd → 安全審計日誌
+└─ 集中到 CloudWatch Agent 統一管理
+```
+
+---
+
+### A10: Mishandling of Exceptional Conditions（異常條件處理不當）
+
+**2025 排名 #10 | 全新類別（取代 SSRF，SSRF 併入 A01）**
+
+**白話解釋：** 系統遇到錯誤或異常時處理不當，可能洩漏敏感資訊、進入不安全狀態、或直接崩潰。
+
+**常見問題：**
+
+| 問題 | 範例 | 風險 |
+|------|------|------|
+| Fail Open | 驗證服務故障時跳過驗證 | 未授權存取 |
+| 資訊洩漏 | 錯誤訊息包含 stack trace | 洩漏內部架構 |
+| 資源耗盡 | 未處理的異常導致 memory leak | DoS |
+| 不一致狀態 | 交易中途失敗未 rollback | 資料損壞 |
+
+**DevOps / Cloud 視角：**
+
+```
+基礎設施層面的異常處理：
+
+1. Terraform apply 失敗
+   ❌ 半套資源建立了，網路不通
+   ✅ 使用 lifecycle rules + depends_on 確保順序
+   ✅ 失敗時有回滾策略
+
+2. 健康檢查和自動復原
+   ✅ ALB health check → 自動移除故障 target
+   ✅ ASG → 自動替換不健康的 instance
+   ✅ Route 53 failover → DNS 層面容災
+
+3. 錯誤頁面
+   ❌ 500 error 顯示完整 stack trace 和 DB 連線字串
+   ✅ 返回通用錯誤訊息，detail 只進日誌
+
+4. Circuit Breaker Pattern
+   ✅ 下游服務故障時快速失敗（而非卡住）
+   ✅ API Gateway 設定 timeout 和 throttling
+```
+
+---
+
+## 對你最重要的 Top 5（DevOps/Cloud Engineer 視角排序）
+
+根據你的背景（AWS 架構、RHEL 維運、Terraform IaC、CI/CD），重新排序：
+
+| 優先級 | 類別 | 原因 |
+|--------|------|------|
+| 1 | **A02 Security Misconfiguration** | 你每天都在配置 AWS 資源、RHEL 系統、Terraform — 這是你最可能犯錯的地方 |
+| 2 | **A01 Broken Access Control** | IAM Policy、S3 Bucket Policy、Security Group — 存取控制是雲端安全的核心 |
+| 3 | **A03 Supply Chain Failures** | CI/CD pipeline、Docker image、Terraform provider — 供應鏈安全直接影響你的部署管線 |
+| 4 | **A09 Logging & Alerting** | CloudTrail、CloudWatch、GuardDuty — 沒有可觀測性就等於瞎飛 |
+| 5 | **A04 Cryptographic Failures** | KMS、ACM、加密配置 — 資料保護是合規的基礎 |
+
+---
+
+## 防禦工具速查表
+
+### 靜態分析（Shift Left — 部署前就抓到問題）
+
+| 工具 | 用途 | 整合方式 |
+|------|------|---------|
+| tfsec / checkov | Terraform 安全掃描 | CI/CD pipeline |
+| trivy | 容器映像 + IaC 漏洞掃描 | CI/CD + Registry |
+| Dependabot | 依賴漏洞通知 + 自動 PR | GitHub native |
+| OWASP ZAP | Web 應用動態掃描 | CI/CD pipeline |
+| Bandit | Python 靜態安全分析 | CI/CD pipeline |
+| hadolint | Dockerfile lint | CI/CD pipeline |
+
+### 運行時防護（Runtime — 部署後持續監控）
+
+| AWS 服務 | 對應 OWASP 類別 | 用途 |
+|----------|----------------|------|
+| GuardDuty | A01, A07 | 智慧威脅偵測 |
+| Security Hub | 全部 | 統一安全態勢 |
+| Config | A02, A05 | 配置合規監控 |
+| CloudTrail | A09 | API 活動審計 |
+| WAF | A01, A05 | Web 應用防火牆 |
+| Inspector | A03, A06 | EC2/Lambda 漏洞掃描 |
+| IAM Access Analyzer | A01 | 過寬權限分析 |
+| Secrets Manager | A04 | 密鑰集中管理 |
+| KMS | A04 | 加密金鑰管理 |
+
+---
+
+## 安全開發生命週期（DevSecOps 視角）
+
+```
+   設計階段              開發階段              部署階段              運維階段
+┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐
+│ 威脅建模     │   │ 靜態掃描     │   │ IaC 安全掃描 │   │ 持續監控     │
+│ 安全需求     │──→│ 依賴掃描     │──→│ 容器掃描     │──→│ 日誌分析     │
+│ 架構審查     │   │ Code Review  │   │ 配置驗證     │   │ 告警回應     │
+│ (A04, A06)  │   │ (A03, A05)  │   │ (A02)       │   │ (A09)       │
+└─────────────┘   └─────────────┘   └─────────────┘   └─────────────┘
+                                                              │
+                                    ┌───────────────────────────┘
+                                    ▼
+                            持續改進 & 回饋
+                            ├─ 滲透測試結果
+                            ├─ 事件事後分析
+                            └─ 更新 Runbook
+```
+
+---
+
+## 實踐檢查清單（DevOps / Cloud Engineer 版）
+
+### 每次部署前
+- [ ] Terraform plan 有經過安全掃描（tfsec/checkov）
+- [ ] Docker image 有經過漏洞掃描（trivy）
+- [ ] 依賴有更新到安全版本
+- [ ] IAM Policy 遵守最小權限原則
+- [ ] Security Group 只開放必要 port
+- [ ] 敏感資料使用 Secrets Manager，不在程式碼中
+
+### 架構設計時
+- [ ] 網路隔離（Public/Private/Isolated subnet）
+- [ ] 加密：傳輸中（TLS）+ 靜態（KMS）
+- [ ] 存取控制：IAM + Resource Policy + VPC Endpoint
+- [ ] 日誌：CloudTrail + VPC Flow Logs + 應用日誌
+- [ ] 告警：GuardDuty + CloudWatch Alarms + SNS
+
+### 系統維運時
+- [ ] 定期修補（yum update --security）
+- [ ] SSH key rotation
+- [ ] IAM Access Key rotation（90 天）
+- [ ] 安全掃描報告 review
+- [ ] 定期檢查 Security Hub findings
+
+---
+
+## 進一步學習資源
+
+### 官方文件
+- [OWASP Top 10:2025 官方](https://owasp.org/Top10/2025/)
 - [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/)
+- [AWS Security Best Practices](https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/)
+- [GCP OWASP Top 10 Mitigation](https://docs.cloud.google.com/architecture/security/owasp-top-ten-mitigation)
 
-### 在線學習平台
-- [OWASP WebGoat](https://owasp.org/www-project-webgoat/) - 交互式學習平台
-- [HackTheBox](https://www.hackthebox.com/) - 實踐安全挑戰
-- [TryHackMe](https://tryhackme.com/) - 初學者友善的安全課程
+### 實作練習
+- [OWASP WebGoat](https://owasp.org/www-project-webgoat/) — 互動式漏洞學習
+- [TryHackMe OWASP Top 10](https://tryhackme.com/) — 引導式安全挑戰
+- [flaws.cloud](http://flaws.cloud/) — AWS 安全實戰挑戰（超推薦）
+- [CloudGoat](https://github.com/RhinoSecurityLabs/cloudgoat) — AWS 安全靶場
 
-### 相關認證
-- **CEH** (Certified Ethical Hacker)
-- **OSCP** (Offensive Security Certified Professional)
-- **Security+** (CompTIA Security+)
-
----
-
-## 🔗 相關資源連結
-
-- [OWASP 官方網站](https://owasp.org/)
-- [OWASP Top 10:2025](https://owasp.org/Top10/2025/)
-- [CWE/SANS Top 25](https://cwe.mitre.org/top25/)
-- [黑暗執行緒 - OWASP 十大筆記](https://blog.darkthread.net/blog/owasp-top-10-n-cwe-top-25/)
+### 相關認證路徑
+- **AWS Security Specialty (SCS)** — 你下一張目標認證，直接涵蓋 OWASP 雲端面向
+- **CompTIA Security+** — 安全基礎廣度
+- **CEH / OSCP** — 深入滲透測試
 
 ---
 
-## 📝 快速參考表
+**Sources:**
+- [OWASP Top 10:2025 Official](https://owasp.org/Top10/2025/)
+- [OWASP Top 10:2021 Official](https://owasp.org/Top10/2021/)
+- [GCP OWASP Top 10 Mitigation Guide](https://docs.cloud.google.com/architecture/security/owasp-top-ten-mitigation)
+- [OWASP Top 10 2025: Key Changes - Aikido](https://www.aikido.dev/blog/owasp-top-10-2025-changes-for-developers)
+- [OWASP Top 10 2025 vs 2021 - Equixly](https://equixly.com/blog/2025/12/01/owasp-top-10-2025-vs-2021/)
+- [Orca Security - OWASP Top 10](https://orca.security/glossary/owasp-top-10-list/)
 
-| # | 漏洞 | 高風險指標 | 防禦優先 |
-|---|-----|---------|--------|
-| 1 | 破損的存取控制 | 無授權檢查 | 🔴 必須 |
-| 2 | 加密失敗 | HTTP 傳輸敏感數據 | 🔴 必須 |
-| 3 | 注入攻擊 | 未驗證的用戶輸入 | 🔴 必須 |
-| 4 | 不安全的設計 | 無威脅建模 | 🟡 重要 |
-| 5 | 安全設置錯誤 | 默認憑證 | 🔴 必須 |
-| 6 | 易受攻擊的元件 | 過時依賴 | 🔴 必須 |
-| 7 | 身份驗證失敗 | 無 MFA | 🔴 必須 |
-| 8 | 數據完整性失敗 | 無簽名檢查 | 🟡 重要 |
-| 9 | 監控不足 | 無日誌記錄 | 🟡 重要 |
-| 10 | SSRF | 無 URL 驗證 | 🟡 重要 |
-
----
-
-## 🚀 實踐檢查清單
-
-在開發應用時，檢查以下項目：
-
-- [ ] 實施強大的存取控制
-- [ ] 所有敏感數據使用 HTTPS
-- [ ] 密碼使用強加密演算法
-- [ ] 使用參數化查詢防止 SQL 注入
-- [ ] 輸出編碼防止 XSS
-- [ ] 更改所有默認認證
-- [ ] 禁用調試模式在生產環境
-- [ ] 定期更新依賴
-- [ ] 實施 MFA
-- [ ] 建立完整的日誌和監控
-- [ ] 進行威脅建模
-- [ ] 定期進行安全測試
-
----
-
-**最後更新**: 2026-02-26
-**版本**: OWASP Top 10:2025
-**來源**: [OWASP 官方文檔](https://owasp.org/Top10/2025/)
+**最後更新**: 2026-03-30
