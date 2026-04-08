@@ -2,6 +2,8 @@
 
 **目標：** 4 週內以考試通過優先，掌握 AWS Advanced Networking Specialty 高頻題型、核心選型判斷與常見陷阱。
 
+**進度：** `34 / 127`
+
 **主教材：**
 - `ans-notes/` 為主線
 - `notes/` 與 `articles/` 僅用來補高頻陷阱與理解盲點
@@ -28,11 +30,32 @@
 - [x] 分清 `VGW = 單 VPC 邊界`
 - [x] 分清 `TGW = 多 VPC / 多站點 hub`
 - [x] 分清 `DXGW = DX 跨 Region / 多 VPC 的邏輯中介`
-- [ ] 分清 `Client VPN = 終端使用者遠端接入`
+- [x] 分清 `DX = physical link`
+- [x] 分清 `VIF = logical lane`
+- [x] 分清 `DXGW = DX 進 AWS 的 distribution hub`
+- [x] 分清 `Site-to-Site VPN = 網路對網路的加密接入`
+- [x] 分清 `Client VPN = 終端使用者遠端接入`
+- [x] 分清 `VPN CloudHub = 多個 remote sites 經同一個 VGW 互通`
 - [x] 理解 DX 為主、VPN 為備援的常見設計
-- [ ] 理解 TGW 為什麼比 full-mesh VPC peering 更適合大規模互聯
+- [x] 分清 `Private VIF = 進 VPC 私網`
+- [x] 分清 `Public VIF = 去 AWS public services`
+- [x] 分清 `Transit VIF = 進 TGW transit 架構`
+- [x] 理解 `Transit VIF -> DXGW -> TGW` 的連接模型
+- [x] 理解 `Private VIF -> DXGW -> VGW -> VPC` 的連接模型
+- [x] 理解 `DXGW` 解的是「一條 DX 不用綁死單一 VPC」的擴展痛點
+- [x] 理解 `VIF` 解的是「同一條 DX 線上不同流量用途的分流」
+- [x] 理解 `DXGW` 不等於 `TGW`
+- [x] 理解 `VGW = one VPC edge`、`TGW = many VPC hub`
+- [x] 理解 TGW 為什麼比 full-mesh VPC peering 更適合大規模互聯
+- [x] 理解 `association = attachment 查哪張 TGW route table`
+- [x] 理解 `propagation = attachment 的路由散到哪些 TGW route table`
+- [x] 理解 `associate to one, propagate to many`
+- [x] 理解 TGW 題型常考的是 segmentation、shared services、attachment 建了卻不通
 - [x] 完成 1 次 Hybrid 題型練習
 - [x] 記錄 3 題 Hybrid 題的錯因或判斷依據
+- [x] 記錄 1 組 Direct Connect / VIF / DXGW 的易混點
+- [x] 記錄 1 組 `VGW vs TGW` 與 `VPN family` 的易混點
+- [x] 記錄 1 組 `association vs propagation` 的易混點
 - [ ] 完成 1 次 TGW / VPN 輕量 lab
 - [ ] 若未實作，改做 1 張 TGW hub-and-spoke 紙上架構圖
 - [x] 題目驗收點：看到 Hybrid 題時，能先判斷該選 DX、VPN、VGW 還是 TGW

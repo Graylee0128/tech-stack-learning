@@ -12,3 +12,4 @@
 ## Logs
 
 - [2026-03-30](./logs/2026-03-30.md) - Week 1 啟動、Hybrid Networking、BGP、VGW / TGW / DXGW、路由優先序、Hybrid 題型演練
+- [2026-04-08](./logs/2026-04-08.md) - Direct Connect、Private / Public / Transit VIF、DXGW、VPN family、VGW vs TGW 的角色與易混點

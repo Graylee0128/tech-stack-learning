@@ -8,6 +8,11 @@ AWS 網路相關的學習筆記和精品文章。涵蓋 VPC、PrivateLink、Dire
 - [learning-log.md](./learning-log.md) - 學習紀錄索引與每日筆記入口
 - [ans-notes/README.md](./ans-notes/README.md) - 9 大主題筆記與建議複習順序
 
+## 近期進度
+
+- Week 1 進行中：已完成 BGP 路由優先序、DX / VIF / DXGW、VPN family、VGW vs TGW 基礎釐清
+- 下一步：補完 Direct Connect 細節與 Transit Gateway route table / attachment 題型
+
 ## 目錄結構
 
 ### notes/ - 學習筆記
@@ -110,4 +115,4 @@ AWS 網路相關的學習筆記和精品文章。涵蓋 VPC、PrivateLink、Dire
 
 ---
 
-**最後更新：** 2026-03-30
+**最後更新：** 2026-04-08
