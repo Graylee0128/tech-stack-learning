@@ -16,6 +16,7 @@ Kubernetes 相關的學習筆記與技術文章。這個目錄目前以三個分
 ### `core/` - Kubernetes 核心
 
 - `k3s-vs-kubernetes.md` - `K3s` 與標準 Kubernetes 的差異、適用場景、選擇邏輯
+- `deployment-strategies.md` - 6 種部署策略比較：Recreate / Ramped / Blue-Green / Canary / A-B Testing / Shadow
 
 ### `ecosystem/` - Kubernetes 常用平台生態
 
@@ -28,6 +29,7 @@ Kubernetes 相關的學習筆記與技術文章。這個目錄目前以三個分
 ### 各分類目前筆記
 
 - `core/k3s-vs-kubernetes.md`
+- `core/deployment-strategies.md`
 - `ecosystem/ecosystem-overview.md`
 - `cluster-admin/kubeadm-basics.md`
 

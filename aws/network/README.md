@@ -6,6 +6,8 @@ AWS 網路相關的學習筆記和精品文章。涵蓋 VPC、PrivateLink、Dire
 
 - [plan.md](./plan.md) - AWS 網路證照 4 週高強度學習計畫
 - [learning-log.md](./learning-log.md) - 學習紀錄索引與每日筆記入口
+- [exam-result-analysis-2026-04-09.md](./exam-result-analysis-2026-04-09.md) - 4/9 ANS 考後分析、弱點判斷與 retake 建議
+- [questions/README.md](./questions/README.md) - 解題紀錄與錯題複盤入口
 - [ans-notes/README.md](./ans-notes/README.md) - 9 大主題筆記與建議複習順序
 
 ## 近期進度
@@ -115,4 +117,4 @@ AWS 網路相關的學習筆記和精品文章。涵蓋 VPC、PrivateLink、Dire
 
 ---
 
-**最後更新：** 2026-04-08
+**最後更新：** 2026-04-10

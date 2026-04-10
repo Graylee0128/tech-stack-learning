@@ -13,6 +13,7 @@
 - `07-hybrid-services.md`
 - `08-eks-networking.md`
 - `09-cost-dr-governance.md`
+- `10-cheatsheet.md` — SkillCertPro Master Cheat Sheet 整理版（快速複習用）
 
 ## 高頻考點導覽
 
