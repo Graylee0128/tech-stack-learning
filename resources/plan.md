@@ -1,107 +1,68 @@
-# 📚 PDF 轉錄計畫 (PDF-to-Markdown Conversion Plan)
+# PDF 轉錄計畫 (PDF-to-Markdown Conversion Plan)
 
 > 參考 HVAC 專案 SOP，建立可擴展的書籍轉錄系統
-> 
-> **目標**：將技術書籍 PDF → 結構化 Markdown 筆記，支援快速查閱與主題精提
+>
+> 目標：將技術書籍 PDF 轉成結構化 Markdown 筆記，支援快速查閱、主題精提與平行執行
 
 ---
 
-## 📋 計畫概述
+## 計畫使用方式
 
-### 目標資料結構
-```
+- `plan.md`：保留目標、原則、進度、優先順序與 step 入口
+- `plan-steps/*.md`：獨立可執行的工作單位，方便單獨丟給 agent
+- `books.md`：書籍總索引與入手狀態
+
+> 如果要省 token，優先只帶 `plan.md` + 單一 `plan-steps/*.md`。
+
+## Step 入口
+
+| 類型 | 檔案 | 用途 |
+|------|------|------|
+| 共用 SOP | [`plan-steps/00-transcription-sop.md`](./plan-steps/00-transcription-sop.md) | PDF 轉錄的共同流程 |
+| 基礎建設 | [`plan-steps/01-foundation.md`](./plan-steps/01-foundation.md) | 目錄、腳本、範本、驗證 |
+| Accelerate raw | [`plan-steps/02-accelerate-raw.md`](./plan-steps/02-accelerate-raw.md) | 章節級 raw 轉錄，已拆成可平行 lane |
+| Accelerate refined | [`plan-steps/03-accelerate-refined.md`](./plan-steps/03-accelerate-refined.md) | 主題統整與面試整理 |
+| 核心技術書 | [`plan-steps/04-core-books.md`](./plan-steps/04-core-books.md) | AWS / K8s 主線書籍 |
+| 補充書籍 | [`plan-steps/05-supplementary-books.md`](./plan-steps/05-supplementary-books.md) | 次優先閱讀與轉錄 |
+| 跨書精提 | [`plan-steps/06-cross-book-refined.md`](./plan-steps/06-cross-book-refined.md) | refined 層交叉索引 |
+| Phoenix Project | [`plan-steps/07-phoenix-project.md`](./plan-steps/07-phoenix-project.md) | 故事型書籍的輕量整理模式 |
+
+## 目標資料結構
+
+```text
 tech-stack-learning/
   resources/
-    ├── books.md          # 書籍總索引 (維護中)
-    ├── plan.md           # 本文件：轉錄計畫與進度
-    ├── *.pdf             # 原始 PDF 檔案
+    ├── books.md                # 書籍總索引
+    ├── plan.md                 # 總覽、進度、入口
+    ├── plan-steps/             # 可獨立執行的 steps
+    ├── *.pdf                   # 原始 PDF
     └── books-notes/
-        ├── raw/          # 預清洗的原始轉錄（逐章節）
-        │   ├── aws-solutions-architects/
-        │   ├── python-aws-cookbook/
-        │   ├── k8s-security/
-        │   └── ...
-        └── refined/      # 主題式精提統整 (可選但推薦)
-            ├── AWS架構設計核心概念.md
-            ├── Kubernetes安全實踐.md
-            └── ...
+        ├── raw/                # 逐章節原始轉錄
+        └── refined/            # 主題式精提統整
 ```
 
-### 核心原則
+## 核心原則
 
 | 原則 | 說明 |
 |------|------|
-| **raw 層** | 逐字逐句原始轉錄 → 供日後精提之用 |
-| **refined 層** | 主題聚集、交叉索引 → 實戰快速參考 |
-| **頁數限制** | 每批轉錄 ≤ 20 頁（避免 token 爆炸） |
-| **大小限制** | 單個 .md 檔預估 ≤ 50KB（拆段） |
-| **驗證** | 轉錄完成後用 `wc -l` 驗證行數合理 |
+| `raw` 層優先 | 先把原始知識安全落地，再做重組 |
+| `refined` 層加值 | 主題聚合、交叉索引、面試可引用 |
+| 小批處理 | 每批轉錄不超過 20 頁，避免 token 爆炸 |
+| 小檔輸出 | 單檔預估不超過 50KB，必要時拆段 |
+| 可驗證 | 轉錄後要做結構與行數檢查 |
+| 可並行 | 每個 step file 盡量只代表一條工作流 |
 
----
+## 當前焦點
 
-## 🔧 轉錄執行 SOP
-
-### 第一階段：預清洗 + 結構化提取
-
-#### Step 1️⃣ - PyPDF2 預清洗
-```bash
-# 安裝依賴
-pip install PyPDF2
-
-# 提取文字（每批 ≤ 20 頁）
-# 腳本應存放於 tools/ 目錄
-bash extract-pdf.sh <pdf_path> <output_dir> --batch-size 20
-```
-
-**輸出格式**：
-```
-output/
-  ├── chapter-01-pages-1-20.txt
-  ├── chapter-02-pages-21-40.txt
-  └── ...
-```
-
-#### Step 2️⃣ - AI 結構化轉換
-- 注入 Markdown 標題層級 (H1/H2/H3)
-- 公式轉 LaTeX 格式 (`$$...$$`)
-- 表格轉 Markdown table
-- 圖片用佔位符標註：`[圖：chapter-02-page-25.png]`
-- 程式碼區塊用語言標籤
-
-#### Step 3️⃣ - 輸出與驗證
-```bash
-# 驗證行數合理性
-wc -l output/*.md
-
-# 預期結果：單檔 < 2000 行
-```
-
-### 第二階段：主題精提（可選但推薦）
-
-**何時執行**：raw 層轉錄完成後
-**方式**：在 `refined/` 層按主題重新組織，加上交叉索引
-
-**範例**：
-```
-raw/aws-solutions-architects/
-  ├── chapter-01-core-concepts.md
-  ├── chapter-02-vpc.md
-  ├── chapter-03-security.md
-  └── ...
-        ↓
-refined/
-  ├── AWS架構設計核心概念.md (整合 ch1-5)
-  ├── AWS網路與安全架構.md (整合 ch2-3-7)
-  └── AWS成本優化.md (整合 ch8-9)
-```
-
----
+1. 先完成 [`plan-steps/01-foundation.md`](./plan-steps/01-foundation.md)，把共用工具補齊。
+2. 以 [`plan-steps/02-accelerate-raw.md`](./plan-steps/02-accelerate-raw.md) 跑第一輪完整流程，目前 Lane A 已完成。
+3. raw 穩定後，再開 [`plan-steps/03-accelerate-refined.md`](./plan-steps/03-accelerate-refined.md)。
 
 ## 📊 進度追蹤表
 
 > 格式說明：
 > - ⬜ 待轉錄
-> - 🟨 進行中
+> - 🟨 部分完成 / 進行中
 > - ✅ raw 層完成
 > - 🎯 refined 層完成（可選）
 
@@ -112,7 +73,7 @@ refined/
 | Solutions Architect's Handbook (2nd Ed.) | Shrivastava et al. | ~500 | ⬜ | - | 優先級 ⭐⭐⭐ |
 | AWS for Solutions Architects (2nd Ed.) | Shrivastava et al. | ~450 | ⬜ | - | 優先級 ⭐⭐⭐ |
 | Python and AWS Cookbook | Mitchell Model | ~300 | ⬜ | - | 優先級 ⭐⭐⭐ |
-| Automated FinOps for Cloud | | ~250 | ⬜ | - | 優先級 ⭐⭐ |
+| Automated FinOps for Cloud | - | ~250 | ⬜ | - | 優先級 ⭐⭐ |
 
 ### Kubernetes / Container
 
@@ -131,94 +92,64 @@ refined/
 
 | 書名 | 作者 | 頁數 | 狀態 | 完成日期 | 備註 |
 |------|------|------|------|---------|------|
-| The Phoenix Project | Kim et al. | ~400 | ⬜ | - | 優先級 ⭐ (故事梗概+核心洞察) |
+| **Accelerate** | Forsgren, Humble, Kim | ~288 | 🟨 進行中 | - | 優先級 ⭐⭐⭐ (在讀中，2026-04-19 入手) |
+| The Phoenix Project | Kim et al. | ~400 | ⬜ | - | 優先級 ⭐ (故事梗概 + 核心洞察；step 已建立) |
+| Team Topologies | Skelton, Pais | ~240 | ⬜ | - | 優先級 ⭐⭐ |
+| Platform Strategy | Gregor Hohpe | ~200 | ⬜ | - | 優先級 ⭐⭐ |
 
----
+## 工作流摘要
 
-## 🚀 執行計畫
+| Workstream | 目標 | 狀態 | 目前進度 | Step |
+|------------|------|------|----------|------|
+| Foundation | 建立共同工具與目錄 | 🟨 | `raw/`、`refined/` 目錄已就緒；腳本/模板/checklist 待補 | [`01-foundation`](./plan-steps/01-foundation.md) |
+| Accelerate raw | 跑第一輪逐章轉錄 | 🟨 | 已完成 `ch00-ch04`，目前 `5/18` | [`02-accelerate-raw`](./plan-steps/02-accelerate-raw.md) |
+| Accelerate refined | 產出主題摘要與面試版 | ⬜ | 尚未開始 | [`03-accelerate-refined`](./plan-steps/03-accelerate-refined.md) |
+| Core books | AWS / K8s 主線書籍 | ⬜ | 尚未開始 | [`04-core-books`](./plan-steps/04-core-books.md) |
+| Supplementary books | 補充書籍 | ⬜ | 尚未開始 | [`05-supplementary-books`](./plan-steps/05-supplementary-books.md) |
+| Cross-book refined | 跨書索引與導覽 | ⬜ | 尚未開始 | [`06-cross-book-refined`](./plan-steps/06-cross-book-refined.md) |
+| Phoenix Project | 輕量整理故事案例書 | 🟨 | 獨立 step 與模板檔已建立，等待填內容 | [`07-phoenix-project`](./plan-steps/07-phoenix-project.md) |
 
-### Phase 1（基礎架構建立）
-- [ ] 建立 `books-notes/raw/` 和 `refined/` 目錄結構
-- [ ] 編寫 `extract-pdf.sh` PyPDF2 預清洗腳本
-- [ ] 建立 Markdown 標準化範本
-- [ ] 建立驗證檢查清單
+## 新增書籍流程
 
-### Phase 2（核心書籍優先）
-- [ ] Solutions Architect's Handbook - 第 1-3 章（試驗流程）
-- [ ] Learn Kubernetes Security - 第 1-2 章（平行進行）
+1. 更新 [`books.md`](./books.md) 的書籍索引。
+2. 在本檔進度表新增一行。
+3. 需要開始轉錄時，建立 `books-notes/raw/<book-slug>/`。
+4. 執行 [`plan-steps/00-transcription-sop.md`](./plan-steps/00-transcription-sop.md)。
+5. 視需求把工作掛進對應的 step file。
 
-### Phase 3（擴展轉錄）
-- [ ] 完成 Solutions Architect's Handbook 全冊
-- [ ] 完成 Learn Kubernetes Security 全冊
-- [ ] Cloud Native DevOps with Kubernetes
-
-### Phase 4（補充書籍）
-- [ ] Python and AWS Cookbook
-- [ ] Automated FinOps for Cloud
-- [ ] GitOps
-
-### Phase 5（主題精提 - 可選）
-- [ ] 建立 refined 層交叉索引
-- [ ] 按主題重組筆記
-- [ ] 新增導覽頁面
-
----
-
-## 📝 新增書籍流程
-
-當有新書加入時：
-
-1. **更新 `books.md`**：在適當類別新增行
-   ```markdown
-   | 新書名 | 作者 | ✅ 已入手 |
-   ```
-
-2. **在 plan.md 進度表新增行**：
-   ```markdown
-   | 新書名 | 作者 | ~XXX | ⬜ | - | 優先級 ⭐⭐ |
-   ```
-
-3. **建立對應目錄**（轉錄時）：
-   ```bash
-   mkdir -p books-notes/raw/new-book-slug/
-   ```
-
-4. **按 SOP 轉錄**：上述第一階段的 Step 1-3
-
----
-
-## 🛠️ 工具和資源
+## 工具和資源
 
 ### 依賴
+
 - Python 3.8+
-- PyPDF2 (PDF 文字提取)
+- PyPDF2
 
 ### 腳本待編寫
+
 | 腳本 | 位置 | 用途 |
 |------|------|------|
 | `extract-pdf.sh` | `tools/` | PyPDF2 批量預清洗 |
 | `validate-markdown.sh` | `tools/` | 驗證轉錄品質 |
 
 ### 參考文檔
-- CLAUDE.md - `pdf-reader.md` skill SOP
-- HVAC 專案結構 - 主題層級化參考
 
----
+- `CLAUDE.md`
+- `pdf-reader.md` skill SOP
+- HVAC 專案結構
 
-## 📌 進度更新日誌
+## 進度更新日誌
 
 | 日期 | 事項 | 狀態 |
 |------|------|------|
-| 2026-04-05 | 建立計畫文檔 plan.md | ✅ |
-| - | Phase 1 架構建立 | ⬜ |
-| - | Phase 2 試驗轉錄 | ⬜ |
+| 2026-04-05 | 建立計畫文檔 `plan.md` | ✅ |
+| 2026-04-19 | 入手 Accelerate PDF，加入進度表，設為 Phase 2 首選試驗書 | ✅ |
+| 2026-04-19 | Foundation 工作流：`raw/`、`refined/` 目錄已建立 | 🟨 |
+| 2026-04-19 | Accelerate raw 工作流：已完成 `ch00-ch04` | 🟨 |
+| 2026-04-19 | 建立 `The Phoenix Project` 獨立 step 與模板檔（輕量整理模式） | 🟨 |
+| - | Accelerate refined 工作流 | ⬜ |
 
----
+## 備註
 
-## 💡 備註
-
-- 本計畫可逐步擴展，新書籍可隨時加入
-- raw 層優先完成，refined 層為可選加值
-- 建議定期審視進度，調整優先級
-- 轉錄結果應納入 git 版本控制 (除大於 50MB 的檔案)
-
+- `plan.md` 盡量不要再塞長 checklist，避免再次膨脹。
+- 需要派工時，直接指定單一 `plan-steps/*.md`。
+- `raw` 是基礎層，`refined` 是加值層；優先順序不要反過來。

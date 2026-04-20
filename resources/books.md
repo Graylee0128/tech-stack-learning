@@ -38,8 +38,8 @@
 
 | 書名 | 作者 | 狀態 |
 |------|------|------|
-| **The Phoenix Project** | Kim, Behr, Spafford | |
-| **Accelerate** | Forsgren, Humble, Kim | |
+| **The Phoenix Project** | Kim, Behr, Spafford | ✅ 已入手 |
+| **Accelerate** | Forsgren, Humble, Kim | ✅ 已入手 |
 | **Team Topologies** | Skelton, Pais | |
 | **Platform Strategy** | Gregor Hohpe | |
 
