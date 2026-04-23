@@ -44,3 +44,7 @@ devops/
 ## 主教材來源
 
 Fork 自 [Ernyoke/certified-aws-devops-professional](https://github.com/Ernyoke/certified-aws-devops-professional)
+
+## 推薦先看
+
+- [notes/devops-core-terms.md](./notes/devops-core-terms.md) - DevOps / SRE 核心術語速查，整理 `P90`、`P99`、`P999`、`SLO`、`讀擴散`、`寫擴散` 等基礎觀念
