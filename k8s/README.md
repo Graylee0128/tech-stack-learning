@@ -17,6 +17,7 @@ Kubernetes 相關的學習筆記與技術文章。這個目錄目前以三個分
 
 - `k3s-vs-kubernetes.md` - `K3s` 與標準 Kubernetes 的差異、適用場景、選擇邏輯
 - `deployment-strategies.md` - 6 種部署策略比較：Recreate / Ramped / Blue-Green / Canary / A-B Testing / Shadow
+- `statefulset-and-stateful-workloads.md` - `StatefulSet`、Headless Service、PV/PVC 與有狀態工作負載入門
 
 ### `ecosystem/` - Kubernetes 常用平台生態
 
@@ -30,6 +31,7 @@ Kubernetes 相關的學習筆記與技術文章。這個目錄目前以三個分
 
 - `core/k3s-vs-kubernetes.md`
 - `core/deployment-strategies.md`
+- `core/statefulset-and-stateful-workloads.md`
 - `ecosystem/ecosystem-overview.md`
 - `cluster-admin/kubeadm-basics.md`
 
@@ -114,4 +116,4 @@ Kubernetes 相關的學習筆記與技術文章。這個目錄目前以三個分
 
 ---
 
-**最後更新：** 2026-03-26
+**最後更新：** 2026-05-01

@@ -30,7 +30,16 @@
   - `cluster-admin/` 進階主題：`kubeadm`、control plane、cluster bootstrap、CNI / CRI / storage / HA
   - `LEARNING-STRUCTURE.md` 總學習架構與建議順序
 
+- **operating-systems/** - 作業系統、I/O、記憶體與效能基礎
+  - `notes/` OS 核心機制、Linux 效能分析與高併發學習筆記
+
+- **sre/** - SRE 方法論、監控、容量與可靠性工程
+  - `notes/` SLI/SLO、monitoring、capacity planning、on-call 等實戰筆記
+
 #### DevOps & Development
+- **cicd/continuous-delivery/** - 持續交付方法論、部署流水線與交付流程設計
+  - `notes/` 持續交付觀念、交付瓶頸與流程設計筆記
+
 - **cicd/github-actions/** - [GitHub Actions 學習與實踐](./cicd/github-actions/)
   - `notes/` 基礎、速查表、最佳實踐 | `articles/` 深度教學
 
@@ -93,4 +102,4 @@
 
 ---
 
-**最後更新：** 2026-02-15
+**最後更新：** 2026-05-01
