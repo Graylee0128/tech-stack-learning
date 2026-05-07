@@ -3,6 +3,8 @@
 **目標：** 用一套可重複的 Linux lab，實際完成 `NFS` 與 `vsftpd` 的安裝、設定、驗證與排錯，並在考前具備基本上機與情境題應對能力。
 **完成進度：** `0 / 67`
 
+> 2026-05-07 補充：這份檔案仍維持 NFS / FTP 上機計畫定位。Cloud Platform / SRE 主線的 Linux internals 總綱改放在 [linux-internals-roadmap.md](./linux-internals-roadmap.md)，避免把單一 lab 計畫膨脹成總 roadmap。
+
 ## 進度維護規則
 
 - `plan.md`：本主題唯一詳細進度來源

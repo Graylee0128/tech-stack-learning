@@ -1,13 +1,19 @@
-# DSA 學習區
+# Applied Algorithms for Systems
 
-目標：建立 Senior SE / AI 時代需要的 DSA 判斷力。先補基本功，再走到 heuristic、近似最佳化與 solver；不要一開始就被大地圖拖走。
+目標：建立 Cloud Platform / SRE / DevSecOps / FinOps 路線需要的演算法判斷力。這裡不再把 Advanced Algorithms 當主線，而是保留對系統工程有實務價值的 applied algorithms。
+
+核心原則：
+
+> 演算法是輔修，不是主戰場。主戰場在 Linux / Networking / Kubernetes / Cloud / SRE / Security / FinOps。
+
+要學的是能幫你理解 sharding、cache、service topology、observability、capacity planning、autoscaling、cost optimization 的算法，而不是追求完整啃完高階理論課。
 
 ## 整理原則
 
 - **README 只留這一份**：這裡是唯一入口與學習計畫。
 - **先做題與寫筆記，再擴目錄**：沒有實作或內容的資料夾先不要開。
 - **技術演進、程式架構不獨立成區**：需要時寫進各 topic 筆記即可。
-- **heuristic 是後段主線，不是起點**：先把 exact algorithm 的核心判斷力補起來。
+- **heuristic 是後段模組，不是主線本身**：先把 systems 會碰到的 graph、hashing、sketch、queueing、optimization intuition 補起來。
 
 ## 目前入口
 
@@ -21,7 +27,7 @@
 
 ## 學習順序
 
-### 1. 最小可用基本功
+### 1. Systems 最小可用基本功
 
 先攻這些，目標是能讀懂題目、估資料量、判斷 AI 生成解法是否合理。
 
@@ -35,7 +41,44 @@ Greedy
 Basic DP
 ```
 
-### 2. 搜尋最佳化
+這一層不追求刷題量最大化，重點是能看懂複雜度、邊界條件、資料量限制，並且知道什麼時候不用把問題想太複雜。
+
+### 2. Applied Algorithms for Systems 主線
+
+這一段是正式輔修重點。
+
+```text
+Graph algorithms
+Hashing
+Consistent hashing
+Bloom filter
+Count-Min Sketch
+HyperLogLog
+MinHash
+Amortized analysis
+Queueing intuition
+Online algorithms 概念
+Approximation algorithms 概念
+Linear programming 基礎
+Constraint optimization
+```
+
+對應的 systems 用途：
+
+| 演算法概念 | 實務連結 |
+|---|---|
+| Graph algorithms | Terraform dependency graph、service topology、network path |
+| Hashing | sharding、cache、load balancing |
+| Consistent hashing | distributed cache、service routing |
+| Bloom filter | cache precheck、deduplication |
+| Count-Min Sketch | heavy hitter detection、observability |
+| HyperLogLog | unique user / high cardinality estimation |
+| Amortized analysis | batching、compaction、buffer flush、autoscaling |
+| Online algorithms | autoscaling、job scheduling、spot instance decision |
+| Approximation | placement、cost optimization |
+| Linear programming | FinOps、capacity planning、resource allocation |
+
+### 3. 搜尋最佳化
 
 這一段處理 so-called「技巧」：它們不是新的資料結構，而是讓暴力搜尋變得可控。
 
@@ -52,7 +95,7 @@ Constraint Propagation
 - **Exact pruning**：剪掉不可能成為答案的分支，不改變正確性。
 - **Heuristic pruning**：為了速度放棄某些分支，可能不保證最佳解。
 
-### 3. 通往 heuristic 的橋
+### 4. 通往 heuristic 的橋
 
 基本功不是為了背模板，而是為了能把問題拆成：
 
@@ -65,7 +108,7 @@ state + action + objective + constraints
 - [Exact / Approximation / Heuristic 比較](notes/01_橫縱分析報告/Exact_Approximation_Heuristic_概念比較筆記.md)
 - [狀態 / 行動 / 評估函數](notes/01_橫縱分析報告/狀態_行動_評估函數_建模筆記.md)
 
-### 4. Heuristic / Approximation / Solver 主線
+### 5. Heuristic / Approximation / Solver 模組
 
 等基本功有手感後，再開始下面這組：
 
@@ -83,6 +126,20 @@ OR-Tools Routing
 近似算法是獨立 topic，不等於 heuristic。它的重點是「不保證最佳，但有可證明的誤差上界」，例如 Set Cover greedy approximation、Vertex Cover 2-approx、Metric TSP approximation。
 
 GA、ACO、MCTS、Network Flow、Segment Tree 這些先不要搶主線進度。它們很有價值，但應該由具體題目需求觸發。
+
+### 暫不投入
+
+以下 topic 暫時不放入近期主線：
+
+```text
+van Emde Boas tree
+fusion tree
+semidefinite programming
+computational geometry
+fast exponential algorithms
+```
+
+不是它們沒價值，而是對目前 Cloud Platform / SRE / DevSecOps / FinOps 的短期 ROI 不高。
 
 ## Topic 工作流
 
