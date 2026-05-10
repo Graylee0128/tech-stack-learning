@@ -368,57 +368,57 @@ C1000K：百萬連線
 
 當系統扛不住大量連線時，瓶頸可能出在任何一層。以下按從上到下的順序排列：
 
-```
+<pre>
 ┌─────────────────────────────────────────────────────┐
 │  Application Layer                                   │
 │  ┌─────────────────────────────────────────────────┐ │
-│  │ • request pattern（熱點集中、慢查詢）             │ │
+│  │ • <strong>request pattern（熱點集中、慢查詢）</strong>             │ │
 │  │ • 序列化 / 反序列化成本（JSON、protobuf）         │ │
-│  │ • connection pool 設定（太小排隊、太大佔資源）     │ │
-│  │ • timeout 設定（太長堆積、太短誤殺）              │ │
-│  │ • cache hit rate（miss → 打穿 DB）               │ │
-│  │ • 重試風暴（upstream 慢 → 指數放大）              │ │
+│  │ • <strong>connection pool 設定（太小排隊、太大佔資源）</strong>     │ │
+│  │ • <strong>timeout 設定（太長堆積、太短誤殺）</strong>              │ │
+│  │ • <strong>cache hit rate（miss → 打穿 DB）</strong>               │ │
+│  │ • <strong>重試風暴（upstream 慢 → 指數放大）</strong>              │ │
 │  └─────────────────────────────────────────────────┘ │
 ├─────────────────────────────────────────────────────┤
 │  Runtime Layer（Go 為例）                            │
 │  ┌─────────────────────────────────────────────────┐ │
-│  │ • goroutine 數量暴增（leak、blocked channel）     │ │
-│  │ • GC 壓力（STW、大量小物件）                      │ │
+│  │ • <strong>goroutine 數量暴增（leak、blocked channel）</strong>     │ │
+│  │ • <strong>GC 壓力（STW、大量小物件）</strong>                      │ │
 │  │ • stack growth / shrink 頻率                      │ │
 │  │ • netpoll 回調延遲                                │ │
-│  │ • scheduler latency（GOMAXPROCS 設定）            │ │
+│  │ • <strong>scheduler latency（GOMAXPROCS 設定）</strong>            │ │
 │  └─────────────────────────────────────────────────┘ │
 ├─────────────────────────────────────────────────────┤
 │  Kernel Layer                                        │
 │  ┌─────────────────────────────────────────────────┐ │
-│  │ • fd 上限（ulimit -n、fs.file-max）               │ │
-│  │ • TCP backlog（somaxconn、syn_backlog）           │ │
+│  │ • <strong>fd 上限（ulimit -n、fs.file-max）</strong>               │ │
+│  │ • <strong>TCP backlog（somaxconn、syn_backlog）</strong>           │ │
 │  │ • conntrack table 滿（NAT / firewall 場景）       │ │
 │  │ • socket buffer 大小（rmem_max、wmem_max）        │ │
-│  │ • context switch 頻率                             │ │
+│  │ • <strong>context switch 頻率</strong>                             │ │
 │  │ • softirq / 中斷處理負載                          │ │
-│  │ • TIME_WAIT 堆積                                  │ │
+│  │ • <strong>TIME_WAIT 堆積</strong>                                  │ │
 │  └─────────────────────────────────────────────────┘ │
 ├─────────────────────────────────────────────────────┤
 │  Network Layer                                       │
 │  ┌─────────────────────────────────────────────────┐ │
 │  │ • NIC 頻寬 / PPS 上限                             │ │
-│  │ • LB 連線數上限、health check 頻率               │ │
+│  │ • <strong>LB 連線數上限、health check 頻率</strong>               │ │
 │  │ • Firewall / Security Group 規則數                │ │
-│  │ • DNS 解析延遲                                    │ │
-│  │ • TCP retransmission / packet loss                │ │
-│  │ • TLS handshake 成本                              │ │
+│  │ • <strong>DNS 解析延遲</strong>                                    │ │
+│  │ • <strong>TCP retransmission / packet loss</strong>                │ │
+│  │ • <strong>TLS handshake 成本</strong>                              │ │
 │  └─────────────────────────────────────────────────┘ │
 ├─────────────────────────────────────────────────────┤
 │  Shared Dependency Layer                             │
 │  ┌─────────────────────────────────────────────────┐ │
-│  │ • DB connection pool 飽和                         │ │
-│  │ • Redis 單執行緒阻塞（KEYS、大 value）            │ │
-│  │ • MQ 消費速度 < 生產速度                          │ │
-│  │ • 跨服務 cascading failure                        │ │
+│  │ • <strong>DB connection pool 飽和</strong>                         │ │
+│  │ • <strong>Redis 單執行緒阻塞（KEYS、大 value）</strong>            │ │
+│  │ • <strong>MQ 消費速度 &lt; 生產速度</strong>                          │ │
+│  │ • <strong>跨服務 cascading failure</strong>                        │ │
 │  └─────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────┘
-```
+</pre>
 
 **使用方式**：遇到高併發問題時，從上往下逐層排查。先確認應用層沒有明顯問題（timeout、pool、cache），再往下看 runtime、kernel、network。大多數線上問題的根因在 Application 或 Shared Dependency 這兩層。
 
